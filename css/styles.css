@@ -1,11 +1,11 @@
 /* 
- * גלגל המזל - כנס המשפטים של ההוצאה לאור של לשכת עורכי הדין
+ * גלגל המזל - כנס המשפטים של הלשכת עורכי הדין
  * קובץ סגנון ראשי
  */
 
 /* ========= אתחול וסגנון בסיסי ========= */
 :root {
-    /* צבעים ראשיים - הותאמו לעיצוב של אתר ההוצאה לאור של לשכת עורכי הדין */
+    /* צבעים ראשיים - הותאמו לעיצוב של אתר הלשכת עורכי הדין */
     --primary-color: #1e3a8a;      /* כחול כהה (לשכה) */
     --primary-light: #3b82f6;      /* כחול בהיר */
     --primary-dark: #1e40af;       /* כחול כהה */
@@ -656,4 +656,28 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* ========= שכבת וידאו מצב המתנה ========= */
+.idle-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.idle-overlay.show {
+    display: flex;
+}
+
+.idle-overlay video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 } 

@@ -4,13 +4,16 @@
  */
 
 import { initWheel, spinWheel, isSpinning } from './wheel.js';
-import { getPrizes, saveWinningRecord } from './api.js';
+import { getPrizes, saveWinningRecord, getSettings } from './api.js';
 import EmailSender from './email-sender.js';
 
 // משתנים גלובליים
 let prizes = [];
 let currentUser = null;
 let emailSender = null;
+let idleSettings = null;
+let idleTimer = null;
+const IDLE_DELAY = 60 * 1000; // דקה
 
 // מערך הפרסים
 const prizesArray = [
@@ -23,14 +26,24 @@ const prizesArray = [
 
 // אתחול האפליקציה
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('מתחיל אתחול אפליקציה');
     try {
         // אתחול שולח המיילים
         emailSender = new EmailSender();
         
         // טעינת פרסים מה-API
+        console.log('טוען פרסים מה-API...');
         prizes = await getPrizes();
+        console.log('התקבלו פרסים:', prizes);
+        
+        // טעינת הגדרות (סרטון מצב המתנה)
+        console.log('טוען הגדרות מה-API...');
+        idleSettings = await getSettings();
+        console.log('התקבלו הגדרות:', idleSettings);
+        setupIdleVideo();
         
         // אתחול גלגל המזל
+        console.log('מאתחל גלגל המזל עם', prizes.length, 'פרסים');
         initWheel(prizes, handleSpinEnd);
         
         // התחברות לכפתור
@@ -159,9 +172,9 @@ function transitionToWheelScreen() {
                 }, 500);
             }, 50);
         }, 500);
-    }, 50);
-}
-
+        }, 50);
+    }
+    
 /**
  * בדיקת תקינות כתובת דוא"ל
  * @param {string} email - כתובת הדוא"ל לבדיקה
@@ -203,6 +216,13 @@ function startSpin() {
  * @param {number} prizeIndex - אינדקס הפרס הזוכה
  */
 async function handleSpinEnd(prizeIndex) {
+    console.log('סיום סיבוב הגלגל, אינדקס פרס:', prizeIndex);
+    
+    if (prizeIndex === undefined || prizeIndex === null || !prizes[prizeIndex]) {
+        console.error('אינדקס פרס לא תקין או פרס לא נמצא:', prizeIndex);
+        return;
+    }
+    
     const prize = prizes[prizeIndex];
     console.log('זכית בפרס:', prize.name);
     
@@ -219,7 +239,8 @@ async function handleSpinEnd(prizeIndex) {
         resultDescription.textContent = prize.description || `זכית ב${prize.name}. נציג מטעמנו יצור איתך קשר בהקדם.`;
         
         // הגדרת תמונת הפרס
-        resultImage.src = getPrizeImagePath(prizeIndex);
+        const prizeId = prize.id || prizeIndex;
+        resultImage.src = getPrizeImagePath(prizeId);
         resultImage.alt = prize.name;
         
         // הסתרת מסך הגלגל והצגת מסך התוצאה
@@ -240,14 +261,17 @@ async function handleSpinEnd(prizeIndex) {
         
         // ניסיון לשמור את הזכייה ב-API
         try {
-            await saveWinningRecord({
+            const winData = {
                 userName: currentUser?.name || 'אורח',
                 userEmail: currentUser?.email || 'לא זמין',
-                prizeId: prizeIndex,
+                prizeId: prize.id || prizeIndex,
                 prizeName: prize.name,
                 timestamp: new Date().toISOString()
-            });
-            console.log('הזכייה נשמרה בהצלחה');
+            };
+            
+            console.log('שומר נתוני זכייה:', winData);
+            const result = await saveWinningRecord(winData);
+            console.log('הזכייה נשמרה בהצלחה, תשובה:', result);
         } catch (error) {
             console.error('שגיאה בשמירת הזכייה:', error);
         }
@@ -309,7 +333,7 @@ function restartApp() {
                     }
                 }, 500);
             }, 50);
-        }, 500);
+            }, 500);
     }, 50);
 }
 
@@ -345,6 +369,13 @@ function displayPrize(prize) {
  * @returns {string} נתיב לתמונת הפרס
  */
 function getPrizeImagePath(prizeId) {
+    console.log('מחפש תמונה לפרס:', prizeId);
+    
+    if (prizeId === undefined || prizeId === null) {
+        console.warn('ID פרס לא תקין:', prizeId);
+        return "assets/images/prizes/prize-generic.png";
+    }
+    
     const prizeImages = {
         1: "assets/images/prizes/legal-advice.png",     // ייעוץ משפטי אישי
         2: "assets/images/prizes/law-books.png",        // חבילת ספרי חקיקה
@@ -357,7 +388,9 @@ function getPrizeImagePath(prizeId) {
     };
     
     // החזרת תמונה ספציפית או תמונה כללית אם אין התאמה
-    return prizeImages[prizeId] || "assets/images/prizes/prize-generic.png";
+    const imagePath = prizeImages[prizeId] || "assets/images/prizes/prize-generic.png";
+    console.log('נתיב תמונה לפרס:', imagePath);
+    return imagePath;
 }
 
 /**
@@ -485,7 +518,7 @@ function setupTermsModal() {
             closeTermsModal();
         }
     });
-}
+} 
 
 /**
  * פתיחת מודל תנאי השימוש עם אנימציה
@@ -521,4 +554,71 @@ function closeTermsModal() {
         termsModal.style.display = 'none';
         document.body.style.overflow = 'auto';
     }, 300);
+}
+
+/**
+ * אתחול וידאו מצב המתנה והאזנה לאירועי משתמש
+ */
+function setupIdleVideo() {
+    const overlay = document.getElementById('idle-overlay');
+    const video = document.getElementById('idle-video');
+    if (!overlay || !video) return;
+    
+    // הגדרת מקור הווידאו מההגדרות
+    if (idleSettings?.idleVideoUrl) {
+        video.src = idleSettings.idleVideoUrl;
+    }
+    
+    // מאזינים לאירועי משתמש
+    ['mousemove', 'keydown', 'click', 'touchstart'].forEach(evt => {
+        document.addEventListener(evt, resetIdleTimer, { passive: true });
+    });
+    
+    // התחלת טיימר ראשוני
+    resetIdleTimer();
+}
+
+/**
+ * איפוס טיימר חוסר פעילות
+ */
+function resetIdleTimer() {
+    const overlay = document.getElementById('idle-overlay');
+    if (!overlay) return;
+    
+    if (!overlay.classList.contains('hidden')) {
+        hideIdleOverlay();
+    }
+    
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(showIdleOverlay, IDLE_DELAY);
+}
+
+/**
+ * הצגת שכבת הווידאו במסך מלא
+ */
+function showIdleOverlay() {
+    const overlay = document.getElementById('idle-overlay');
+    const video = document.getElementById('idle-video');
+    if (!overlay || !video) return;
+    
+    // אל תציג אם אין וידאו תקין
+    if (!idleSettings?.idleVideoUrl) return;
+    if (!video.src) {
+        video.src = idleSettings.idleVideoUrl;
+    }
+    
+    overlay.classList.add('show');
+    overlay.classList.remove('hidden');
+    video.currentTime = 0;
+    video.play().catch(() => {/* דיכוי שגיאת autoplay */});
+}
+
+function hideIdleOverlay() {
+    const overlay = document.getElementById('idle-overlay');
+    const video = document.getElementById('idle-video');
+    if (!overlay || !video) return;
+    
+    video.pause();
+    overlay.classList.remove('show');
+    overlay.classList.add('hidden');
 }

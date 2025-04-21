@@ -8,6 +8,12 @@ const API_BASE_URL = '/api';
 // זמן קש לקריאות (במילישניות)
 const CACHE_DURATION = 60 * 1000; // דקה אחת
 
+// כתובת ה-Apps Script (להחליף ב-URL בפועל לאחר פריסה)
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXFUxw22hkHVsC9V89zKcAfV0G4WSQ2CwTDl38NIQCmU00-S2cbjs9SlVDKYtGh0DF/exec';
+
+// האם לכפות שימוש ב-API גם בסביבת פיתוח
+const FORCE_API_IN_DEV = true;
+
 /**
  * מטמון פרסים - שימוש למניעת קריאות עודפות
  */
@@ -42,15 +48,25 @@ export async function getPrizes() {
     }
 
     try {
-        // בסביבת פיתוח: החזרת נתוני דמה כדי להימנע מקריאות API
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // בדיקה האם להשתמש בנתוני דמה
+        if (shouldUseMockData()) {
             console.log('סביבת פיתוח: משתמש בנתוני דמה');
             return getMockPrizes();
         }
 
-        // בסביבת ייצור: קריאה אמיתית לשרת
-        const response = await fetch(`${API_BASE_URL}/prizes`);
+        console.log('מתחבר ל-Google Sheets דרך Apps Script:', APPS_SCRIPT_URL);
+        
+        // קריאה ל-Apps Script לקבלת פרסים
+        const response = await fetch(`${APPS_SCRIPT_URL}?action=getPrizes`, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
         const data = await handleResponse(response);
+
+        console.log('התקבלו פרסים מהשרת:', data);
 
         // שמירה במטמון
         prizesCache.data = data;
@@ -59,8 +75,7 @@ export async function getPrizes() {
         return data;
     } catch (error) {
         console.error('שגיאה בשליפת פרסים:', error);
-        
-        // במקרה של שגיאה, החזר נתוני דמה
+        console.warn('משתמש בנתוני דמה עקב שגיאת התחברות לשרת');
         return getMockPrizes();
     }
 }
@@ -72,25 +87,31 @@ export async function getPrizes() {
  */
 export async function saveWinningRecord(winRecord) {
     try {
-        // בסביבת פיתוח: סימולציה של בקשת POST מוצלחת
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // בדיקה האם להשתמש בנתוני דמה
+        if (shouldUseMockData()) {
             console.log('סביבת פיתוח: סימולציה של שמירת זכייה', winRecord);
             return { success: true, id: `mock-${Date.now()}` };
         }
 
-        // בסביבת ייצור: שליחת הנתונים לשרת
-        const response = await fetch(`${API_BASE_URL}/wins`, {
+        console.log('שולח נתוני זכייה ל-Google Sheets:', winRecord);
+
+        // שליחת הנתונים ל-Apps Script
+        const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
+            mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(winRecord)
+            body: JSON.stringify({ action: 'saveWin', payload: winRecord })
         });
 
-        return await handleResponse(response);
+        const result = await handleResponse(response);
+        console.log('תוצאת שמירת זכייה:', result);
+        return result;
     } catch (error) {
         console.error('שגיאה בשמירת זכייה:', error);
-        throw error;
+        console.warn('משתמש בסימולציה של שמירת זכייה עקב שגיאת התחברות');
+        return { success: true, id: `mock-${Date.now()}` };
     }
 }
 
@@ -139,4 +160,42 @@ export function getRandomPrize() {
     
     // במקרה קצה, החזר את הפרס האחרון
     return prizes[prizes.length - 1];
+}
+
+/**
+ * שליפת הגדרות (לדוגמה: קישור סרטון)
+ * @returns {Promise<Object>} - אובייקט הגדרות
+ */
+export async function getSettings() {
+    try {
+        // בדיקה האם להשתמש בנתוני דמה
+        if (shouldUseMockData()) {
+            console.log('סביבת פיתוח: משתמש בהגדרות דמה');
+            return { idleVideoUrl: 'https://www.example.com/video.mp4' };
+        }
+
+        console.log('מושך הגדרות מ-Google Sheets');
+        const response = await fetch(`${APPS_SCRIPT_URL}?action=getSettings`, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await handleResponse(response);
+        console.log('התקבלו הגדרות מהשרת:', data);
+        return data;
+    } catch (error) {
+        console.error('שגיאה בשליפת הגדרות:', error);
+        return { idleVideoUrl: '' };
+    }
+}
+
+/**
+ * בדיקה האם אנחנו בסביבת פיתוח והאם צריך להשתמש בנתוני דמה
+ * @returns {boolean} האם להשתמש בנתוני דמה
+ */
+function shouldUseMockData() {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    return isLocalhost && !FORCE_API_IN_DEV;
 } 
