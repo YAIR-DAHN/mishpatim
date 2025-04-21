@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ברכות על הזכייה שלך!</title>
+    <style>
+        /* סגנונות כלליים */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Heebo', 'Arial', 'Helvetica', sans-serif;
+            direction: rtl;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+        
+        /* מיכל ראשי */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        
+        /* כותרת */
+        .header {
+            background-color: #1e3a8a;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header img {
+            max-width: 220px;
+            height: auto;
+        }
+        
+        /* תוכן */
+        .content {
+            padding: 30px;
+            background-color: #ffffff;
+        }
+        
+        /* כותרת ראשית */
+        h1 {
+            color: #1e3a8a;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        /* פרטי הזכייה */
+        .prize-details {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            border-right: 4px solid #0891b2;
+            text-align: center;
+        }
+        
+        .prize-image {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .prize-image img {
+            max-width: 150px;
+            height: auto;
+        }
+        
+        .button {
+            display: inline-block;
+            background-color: #1e3a8a;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        
+        /* פוטר */
+        .footer {
+            padding: 20px;
+            text-align: center;
+            background-color: #f3f4f6;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .social-links {
+            margin: 15px 0;
+        }
+        
+        .social-links a {
+            margin: 0 5px;
+            text-decoration: none;
+            color: #1e3a8a;
+        }
+        
+        .contact-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 12px;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- כותרת המייל -->
+        <div class="header">
+            <img src="{{LOGO_URL}}" alt="לוגו ההוצאה לאור של לשכת עורכי הדין">
+        </div>
+        
+        <!-- תוכן המייל -->
+        <div class="content">
+            <h1>ברכות {{NAME}} על הזכייה שלך!</h1>
+            
+            <p>שלום {{NAME}},</p>
+            
+            <p>אנו שמחים לבשר לך שזכית בפרס במסגרת ההגרלה בכנס המשפטים של ההוצאה לאור של לשכת עורכי הדין:</p>
+            
+            <div class="prize-details">
+                <h2>הפרס שלך: {{PRIZE_NAME}}</h2>
+                
+                <div class="prize-image">
+                    <img src="{{PRIZE_IMAGE_URL}}" alt="{{PRIZE_NAME}}">
+                </div>
+                
+                <p>מועד הזכייה: {{DATE}}</p>
+            </div>
+            
+            <p>אנו מודים לך על השתתפותך בכנס ומאחלים לך המשך חוויה מקצועית ומהנה.</p>
+            
+            <p>נציג מההוצאה לאור של לשכת עורכי הדין יצור איתך קשר בימים הקרובים כדי לתאם את קבלת הפרס.</p>
+            
+            <p>לפרטים נוספים או לשאלות, אנא צרו קשר בטלפון <a href="tel:+97236368222">03-6368222</a> או בדוא"ל <a href="mailto:support@lawpub.odoo.com">support@lawpub.odoo.com</a>.</p>
+            
+            <div style="text-align: center;">
+                <a href="{{WEBSITE_URL}}" class="button">לאתר ההוצאה לאור</a>
+            </div>
+        </div>
+        
+        <!-- פוטר -->
+        <div class="footer">
+            <p>© ההוצאה לאור של לשכת עורכי הדין בע"מ {{CURRENT_YEAR}}. כל הזכויות שמורות.</p>
+            
+            <div class="social-links">
+                <a href="{{FACEBOOK_URL}}">פייסבוק</a> |
+                <a href="{{LINKEDIN_URL}}">לינקדאין</a> |
+                <a href="{{TWITTER_URL}}">טוויטר</a>
+            </div>
+            
+            <div class="contact-info">
+                בית קרדן, מנחם בגין 154, תל-אביב 6492107 | טלפון: 03-6368222 | פקס: 03-6368221
+            </div>
+            
+            <p>מכתב זה נשלח אליך בעקבות השתתפותך בכנס המשפטים. אם קיבלת הודעה זו בטעות, אנא התעלם ממנה.</p>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,820 @@
+/* עיצוב כללי */
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Heebo', sans-serif;
+    background: linear-gradient(135deg, #1a237e, #283593);
+    color: #333;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    background-attachment: fixed;
+}
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* עיצוב הכותרת והלוגו */
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeIn 1s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.logo-container {
+    margin-bottom: 20px;
+    transform: scale(1);
+    transition: transform 0.3s ease;
+}
+
+.logo-container:hover {
+    transform: scale(1.05);
+}
+
+.logo {
+    max-width: 200px;
+    height: auto;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+}
+
+.main-title {
+    color: #fff;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+/* עיצוב הסקשנים */
+.section {
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    margin-bottom: 35px;
+    transform: translateY(0);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: sectionAppear 0.7s ease-out;
+}
+
+@keyframes sectionAppear {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.section h2 {
+    color: #1a237e;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-align: center;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.section h2:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #1a237e, #0891b2);
+    border-radius: 3px;
+}
+
+/* עיצוב הטופס */
+.user-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    background-color: #f9f9f9;
+}
+
+.form-group input:focus {
+    border-color: #1a237e;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.15);
+    background-color: #fff;
+}
+
+.form-group:focus-within label {
+    color: #1a237e;
+}
+
+.required {
+    color: #f44336;
+    margin-right: 4px;
+}
+
+/* עיצוב כפתורים */
+.btn {
+    display: inline-block;
+    padding: 14px 30px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-align: center;
+    color: #fff;
+    background: linear-gradient(45deg, #1a237e, #283593);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    background: linear-gradient(45deg, #283593, #1976d2);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn:disabled {
+    background: #9e9e9e;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.primary-btn {
+    width: 100%;
+    max-width: 300px;
+    margin: 10px auto;
+    display: block;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* עיצוב גלגל המזל */
+.wheel-section {
+    text-align: center;
+}
+
+.wheel-container {
+    margin: 30px auto;
+    position: relative;
+    max-width: 400px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.wheel-container:hover {
+    transform: scale(1.02);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+canvas#wheel-canvas {
+    display: block;
+    margin: 0 auto;
+    border-radius: 50%;
+}
+
+/* עיצוב תוצאות */
+.result-container {
+    text-align: center;
+    padding: 30px;
+    margin-top: 40px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+    animation: resultAppear 0.8s ease-out;
+}
+
+@keyframes resultAppear {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.result-container:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, #0891b2, #1a237e);
+}
+
+.prize-display {
+    font-size: 2rem;
+    color: #1a237e;
+    margin-bottom: 30px;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    position: relative;
+    display: inline-block;
+}
+
+.prize-display:after {
+    content: '🎉';
+    position: absolute;
+    right: -35px;
+    top: -5px;
+    font-size: 1.5rem;
+}
+
+/* עיצוב פוטר */
+.footer {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 40px;
+    font-size: 0.9rem;
+}
+
+.footer p {
+    margin: 10px 0;
+}
+
+.footer a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+/* עיצוב הודעות שגיאה */
+.error-container {
+    background-color: rgba(244, 67, 54, 0.1);
+    border-left: 4px solid #f44336;
+    color: #d32f2f;
+    padding: 15px;
+    margin: 20px auto;
+    border-radius: 4px;
+    font-weight: 500;
+    text-align: right;
+    max-width: 600px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transition: all 0.3s ease;
+    animation: errorAppear 0.5s ease forwards;
+}
+
+@keyframes errorAppear {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.error-container::before {
+    content: '⚠️';
+    margin-left: 10px;
+    font-size: 1.2rem;
+}
+
+/* עיצוב מצב מוסתר */
+.hidden {
+    display: none !important;
+}
+
+/* התאמה למובייל */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .app-container {
+        padding: 10px;
+    }
+    
+    .main-title {
+        font-size: 2rem;
+    }
+    
+    .section {
+        padding: 20px;
+    }
+    
+    .wheel-container {
+        max-width: 300px;
+    }
+}
+
+/* עיצוב תיבת הסימון ותנאי השימוש */
+.form-group label[for="terms-checkbox"] {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-left: 8px;
+    cursor: pointer;
+    transform: scale(1.2);
+    accent-color: #1a237e;
+}
+
+.form-group #terms-link {
+    color: #0891b2;
+    text-decoration: none;
+    margin-right: 4px;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.form-group #terms-link:hover {
+    text-decoration: underline;
+    color: #1a237e;
+}
+
+/* עיצוב המודל */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.modal.show {
+    opacity: 1;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 35px;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 15px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    transform: translateY(0);
+    transition: all 0.4s ease-out;
+    animation: modalAppear 0.5s ease-out;
+    overflow: hidden;
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, #1a237e, #0891b2);
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-70px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-content h2 {
+    color: #1a237e;
+    margin-bottom: 25px;
+    font-size: 2rem;
+    text-align: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+    position: relative;
+}
+
+.modal-content h2::after {
+    content: '📋';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+.close {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+.close:hover {
+    color: #d32f2f;
+    transform: rotate(90deg);
+    background-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.terms-content {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 25px;
+    line-height: 1.8;
+    margin: 20px 0;
+    background-color: #f8f8f8;
+    border-radius: 12px;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.terms-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terms-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+
+.terms-content::-webkit-scrollbar-thumb {
+    background: rgba(26, 35, 126, 0.4);
+    border-radius: 10px;
+}
+
+.terms-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(26, 35, 126, 0.6);
+}
+
+.terms-content p {
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    color: #333;
+    text-align: justify;
+}
+
+.terms-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* אנימציות וטרנזיציות נוספות */
+.terms-content p strong {
+    color: #1a237e;
+    font-size: 1.1rem;
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+/* אפקט הדגשה לקישור תנאי השימוש */
+#terms-link {
+    position: relative;
+    display: inline-block;
+}
+
+#terms-link::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #0891b2, transparent);
+    transform: scaleX(0.7);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+#terms-link:hover::before {
+    transform: scaleX(1);
+}
+
+/* עיצוב תיקון סגנון לכפתור התחל מחדש */
+.restart-button {
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(45deg, #0891b2, #0e7490);
+    border-radius: 50px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.restart-button:hover {
+    background: linear-gradient(45deg, #0e7490, #1a237e);
+}
+
+.restart-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: all 0.6s ease;
+}
+
+.restart-button:hover::before {
+    left: 100%;
+}
+
+/* סגנון לטופס עם התמקדות */
+.user-form:focus-within {
+    animation: formPulse 1s ease;
+}
+
+@keyframes formPulse {
+    0% { box-shadow: 0 0 0 0 rgba(26, 35, 126, 0.1); }
+    70% { box-shadow: 0 0 0 15px rgba(26, 35, 126, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(26, 35, 126, 0); }
+}
+
+/* אפקט focus לשדות קלט */
+.form-group input:focus {
+    border-color: #1a237e;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.15);
+    background-color: #fff;
+    animation: inputFocus 0.3s ease;
+}
+
+@keyframes inputFocus {
+    0% { transform: scale(0.98); }
+    70% { transform: scale(1.01); }
+    100% { transform: scale(1); }
+}
+
+/* עיצוב מסך פתיחה */
+#splash-screen {
+    background: linear-gradient(135deg, #1a237e, #283593);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#promo-video {
+    width: 80%;
+    max-width: 800px;
+    aspect-ratio: 16/9;
+    background-color: #000;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.start-instruction {
+    font-size: 1.5rem;
+    color: #fff;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+/* עיצוב מסך הזכייה */
+.prize-container {
+    background-color: rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    padding: 3rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+}
+
+#prize-display {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #ffeb3b;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.confetti {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* אנימציות */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(var(--final-rotation)); }
+}
+
+/* כפתור סיבוב */
+.spin-button {
+    margin-top: 30px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: all 0.4s ease;
+}
+
+.spin-button:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #ff4081, #e91e63);
+    z-index: -1;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s ease;
+}
+
+.spin-button:hover:before {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.spin-button:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+/* כפתור אישור תנאי שימוש */
+.form-actions {
+    margin-top: 30px;
+}
+
+.submit-btn {
+    position: relative;
+    overflow: hidden;
+    padding: 15px 30px;
+    background: linear-gradient(45deg, #1a237e, #0891b2);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    box-shadow: 0 6px 15px rgba(26, 35, 126, 0.3);
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    display: block;
+}
+
+.submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: all 0.6s ease;
+}
+
+.submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(26, 35, 126, 0.4);
+    background: linear-gradient(45deg, #0891b2, #1a237e);
+}
+
+.submit-btn:hover::before {
+    left: 100%;
+}
+
+.submit-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 10px rgba(26, 35, 126, 0.3);
+}
+
+/* עיצוב תיבת הסימון של תנאי השימוש */
+.form-group label[for="terms-checkbox"] {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: normal;
+    padding: 10px 15px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.form-group label[for="terms-checkbox"]:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.03);
+}
+
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-left: 15px;
+    cursor: pointer;
+    transform: scale(1.5);
+    accent-color: #1a237e;
+    transition: all 0.3s ease;
+}
+
+.form-group input[type="checkbox"]:checked + a {
+    font-weight: 600;
+}
+
+.form-group #terms-link {
+    color: #0891b2;
+    text-decoration: none;
+    margin-right: 6px;
+    font-weight: 500;
+    transition: all 0.3s;
+    position: relative;
+    padding-bottom: 2px;
+}
+
+.form-group #terms-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #1a237e;
+    transition: width 0.3s ease;
+}
+
+.form-group #terms-link:hover {
+    color: #1a237e;
+}
+
+.form-group #terms-link:hover::after {
+    width: 100%;
+} 

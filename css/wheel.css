@@ -1,0 +1,229 @@
+/* גלגל המזל - סגנונות */
+
+.wheel-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+}
+
+.wheel-outer {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* שומר על יחס 1:1 */
+  margin-bottom: var(--space-lg);
+}
+
+.wheel-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 10px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 0 0 5px rgba(255, 255, 255, 0.1),
+    0 0 20px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(0, 0, 0, 0.1);
+  transform: rotate(0deg);
+  transition: transform 5s cubic-bezier(0.17, 0.67, 0.26, 0.99);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+.wheel-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 15%;
+  height: 15%;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  border: 5px solid var(--accent-color);
+}
+
+.wheel-center::before {
+  content: "";
+  position: absolute;
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  background: var(--accent-color);
+}
+
+.wheel-segments {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.wheel-segment {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 50% 100%);
+  transform-origin: center left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.segment-text {
+  position: absolute;
+  left: 75%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  font-weight: bold;
+  font-size: var(--font-size-base);
+  color: white;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  width: 40%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wheel-pointer {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background: var(--accent-color);
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  z-index: 1;
+}
+
+.wheel-button-container {
+  width: 100%;
+  text-align: center;
+  margin-top: var(--space-lg);
+}
+
+.wheel-button {
+  background: linear-gradient(to right, var(--accent-color), #ff8c00);
+  color: white;
+  font-weight: bold;
+  font-size: var(--font-size-lg);
+  padding: var(--space-md) var(--space-xl);
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.wheel-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.wheel-button:active {
+  transform: translateY(-1px);
+}
+
+.wheel-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.wheel-button::after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 30px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.5);
+  top: -100px;
+  left: 0;
+  transform: rotate(45deg);
+  animation: button-shine 3s infinite;
+  opacity: 0;
+}
+
+.wheel-button:hover::after {
+  opacity: 1;
+}
+
+@keyframes button-shine {
+  0% {
+    left: -100px;
+  }
+  50% {
+    left: 150%;
+  }
+  100% {
+    left: 150%;
+  }
+}
+
+.wheel-spinning .wheel-inner {
+  animation: wheel-blur 0.3s ease-in forwards;
+}
+
+.wheel-spinning .wheel-button {
+  pointer-events: none;
+}
+
+@keyframes wheel-blur {
+  from {
+    filter: blur(0);
+  }
+  to {
+    filter: blur(1px);
+  }
+}
+
+/* תמיכה במסכים קטנים */
+@media (max-width: 768px) {
+  .wheel-container {
+    max-width: 350px;
+    padding: var(--space-md);
+  }
+  
+  .segment-text {
+    font-size: var(--font-size-sm);
+  }
+  
+  .wheel-button {
+    font-size: var(--font-size-base);
+    padding: var(--space-sm) var(--space-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .wheel-container {
+    max-width: 280px;
+    padding: var(--space-sm);
+  }
+  
+  .wheel-inner {
+    border-width: 5px;
+  }
+  
+  .wheel-center {
+    border-width: 3px;
+  }
+} 

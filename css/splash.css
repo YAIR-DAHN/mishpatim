@@ -1,0 +1,228 @@
+/* מסך פתיחה - סגנונות */
+
+.splash-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 1;
+  overflow: hidden;
+  background-image: url('../assets/images/pattern.svg');
+  background-position: center;
+  background-size: cover;
+}
+
+.splash-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(52, 152, 219, 0.95) 0%,
+    rgba(231, 76, 60, 0.85) 100%
+  );
+  z-index: -1;
+}
+
+.splash-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-xl);
+}
+
+.splash-logo {
+  width: 150px;
+  height: 150px;
+  margin-bottom: var(--space-lg);
+  animation: float 3s ease-in-out infinite;
+}
+
+.splash-title {
+  font-size: calc(var(--font-size-xxl) * 1.2);
+  margin-bottom: var(--space-lg);
+  color: white;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  animation: fadeInDown 1s ease;
+}
+
+.splash-subtitle {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-xl);
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  animation: fadeIn 1.5s ease;
+}
+
+.video-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto var(--space-xl) auto;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  position: relative;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  background-color: #000;
+  animation: fadeInUp 1s ease 0.5s both;
+}
+
+.video-container iframe,
+.video-container video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  object-fit: cover;
+}
+
+.splash-button {
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  background: var(--accent-color);
+  color: var(--text-light);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 2s ease 1s both;
+}
+
+.splash-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background: var(--accent-hover);
+}
+
+.splash-button:active {
+  transform: translateY(-2px);
+}
+
+.splash-button::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  opacity: 0;
+  transform: scale(0);
+  transition: transform 0.5s, opacity 0.5s;
+}
+
+.splash-button:hover::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.splash-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.splash-particle {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  width: 10px;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  animation: float-particle 15s linear infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-particle {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+    border-radius: 50%;
+  }
+  100% {
+    transform: translateY(-1000px) rotate(720deg);
+    opacity: 0;
+    border-radius: 50%;
+  }
+}
+
+/* תגובתיות */
+@media (max-width: 768px) {
+  .splash-content {
+    padding: var(--space-lg);
+  }
+  
+  .splash-title {
+    font-size: var(--font-size-xxl);
+  }
+  
+  .splash-subtitle {
+    font-size: var(--font-size-lg);
+    max-width: 100%;
+  }
+  
+  .splash-logo {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .video-container {
+    max-width: 90%;
+  }
+  
+  .splash-button {
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--font-size-base);
+  }
+}
+
+@media (max-width: 480px) {
+  .splash-title {
+    font-size: calc(var(--font-size-xl) * 1.2);
+  }
+  
+  .splash-subtitle {
+    font-size: var(--font-size-base);
+  }
+  
+  .splash-logo {
+    width: 80px;
+    height: 80px;
+  }
+} 
