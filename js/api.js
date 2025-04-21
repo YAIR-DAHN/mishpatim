@@ -9,7 +9,7 @@ const API_BASE_URL = '/api';
 const CACHE_DURATION = 60 * 1000; // דקה אחת
 
 // כתובת ה-Apps Script (להחליף ב-URL בפועל לאחר פריסה)
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXFUxw22hkHVsC9V89zKcAfV0G4WSQ2CwTDl38NIQCmU00-S2cbjs9SlVDKYtGh0DF/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvsdF_PKMgGAmx5k0sagNrSzuUuZW_nJ3pUtbJEe_nkF8ahQKA0RwlfSG9iYD4W3wN/exec';
 
 // האם לכפות שימוש ב-API גם בסביבת פיתוח
 const FORCE_API_IN_DEV = true;
@@ -56,27 +56,57 @@ export async function getPrizes() {
 
         console.log('מתחבר ל-Google Sheets דרך Apps Script:', APPS_SCRIPT_URL);
         
-        // קריאה ל-Apps Script לקבלת פרסים
-        const response = await fetch(`${APPS_SCRIPT_URL}?action=getPrizes`, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json'
+        try {
+            // ניסיון ראשון עם CORS רגיל
+            const response = await fetch(`${APPS_SCRIPT_URL}?action=getPrizes`, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await handleResponse(response);
+
+            console.log('התקבלו פרסים מהשרת:', data);
+
+            // שמירה במטמון
+            prizesCache.data = data;
+            prizesCache.timestamp = now;
+
+            return data;
+        } catch (corsError) {
+            console.warn('שגיאת CORS בגישה לפרסים:', corsError);
+            console.log('מנסה שוב עם נתוני דמה בגלל שגיאת CORS');
+            
+            // אם יש שגיאת CORS, ננסה לבצע בקשה no-cors כדי לנסות לאתחל את החיבור לשרת
+            try {
+                await fetch(`${APPS_SCRIPT_URL}?action=getPrizes`, {
+                    method: 'GET',
+                    mode: 'no-cors'
+                });
+            } catch (e) {
+                // התעלם משגיאות בבקשת no-cors
             }
-        });
-        const data = await handleResponse(response);
-
-        console.log('התקבלו פרסים מהשרת:', data);
-
-        // שמירה במטמון
-        prizesCache.data = data;
-        prizesCache.timestamp = now;
-
-        return data;
+            
+            // נחזיר נתוני דמה במקרה של שגיאת CORS
+            const mockData = getMockPrizes();
+            
+            // שמירה במטמון
+            prizesCache.data = mockData;
+            prizesCache.timestamp = now;
+            
+            return mockData;
+        }
     } catch (error) {
         console.error('שגיאה בשליפת פרסים:', error);
         console.warn('משתמש בנתוני דמה עקב שגיאת התחברות לשרת');
-        return getMockPrizes();
+        
+        const mockData = getMockPrizes();
+        // שמירה במטמון
+        prizesCache.data = mockData;
+        prizesCache.timestamp = now;
+        
+        return mockData;
     }
 }
 
@@ -95,23 +125,46 @@ export async function saveWinningRecord(winRecord) {
 
         console.log('שולח נתוני זכייה ל-Google Sheets:', winRecord);
 
-        // שליחת הנתונים ל-Apps Script
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ action: 'saveWin', payload: winRecord })
-        });
+        try {
+            // ניסיון ראשון עם CORS רגיל
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: 'saveWin', payload: winRecord })
+            });
 
-        const result = await handleResponse(response);
-        console.log('תוצאת שמירת זכייה:', result);
-        return result;
+            const result = await handleResponse(response);
+            console.log('תוצאת שמירת זכייה:', result);
+            return result;
+        } catch (corsError) {
+            console.warn('שגיאת CORS בשמירת זכייה:', corsError);
+            console.log('מנסה שוב עם מצב no-cors');
+            
+            // ניסיון לשליחה ב-no-cors (לידיעה בלבד - לא נוכל לקרוא את התשובה)
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: 'saveWin', payload: winRecord })
+                });
+                console.log('בקשה במצב no-cors נשלחה, אך לא ניתן לקרוא את התשובה');
+            } catch (e) {
+                // התעלם משגיאות בקשת no-cors
+            }
+            
+            // נחזיר תשובת הצלחה מדומה
+            return { success: true, id: `mock-cors-${Date.now()}` };
+        }
     } catch (error) {
         console.error('שגיאה בשמירת זכייה:', error);
         console.warn('משתמש בסימולציה של שמירת זכייה עקב שגיאת התחברות');
-        return { success: true, id: `mock-${Date.now()}` };
+        return { success: true, id: `mock-error-${Date.now()}` };
     }
 }
 
@@ -163,7 +216,7 @@ export function getRandomPrize() {
 }
 
 /**
- * שליפת הגדרות (לדוגמה: קישור סרטון)
+ * פונקציה לשליפת הגדרות (לדוגמה: קישור סרטון)
  * @returns {Promise<Object>} - אובייקט הגדרות
  */
 export async function getSettings() {
@@ -175,16 +228,32 @@ export async function getSettings() {
         }
 
         console.log('מושך הגדרות מ-Google Sheets');
-        const response = await fetch(`${APPS_SCRIPT_URL}?action=getSettings`, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        const data = await handleResponse(response);
-        console.log('התקבלו הגדרות מהשרת:', data);
-        return data;
+        try {
+            // ניסיון ראשון עם CORS רגיל
+            const response = await fetch(`${APPS_SCRIPT_URL}?action=getSettings`, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await handleResponse(response);
+            console.log('התקבלו הגדרות מהשרת:', data);
+            return data;
+        } catch (corsError) {
+            console.warn('שגיאת CORS בגישה לשרת:', corsError);
+            console.log('מנסה שוב עם מצב no-cors');
+            
+            // אם יש שגיאת CORS, נשתמש במצב no-cors ונחזיר תשובת ברירת מחדל
+            // שים לב: במצב no-cors לא ניתן לקרוא את התוכן של התשובה
+            await fetch(`${APPS_SCRIPT_URL}?action=getSettings`, {
+                method: 'GET',
+                mode: 'no-cors'
+            });
+            
+            // מאחר שלא ניתן לקרוא את התשובה במצב no-cors, נחזיר ערך ברירת מחדל
+            return { idleVideoUrl: 'https://www.example.com/video.mp4' };
+        }
     } catch (error) {
         console.error('שגיאה בשליפת הגדרות:', error);
         return { idleVideoUrl: '' };
