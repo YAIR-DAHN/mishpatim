@@ -378,18 +378,18 @@ function getPrizeImagePath(prizeId) {
     }
     
     const prizeImages = {
-        1: "assets/images/prizes/legal-advice.png",     // ייעוץ משפטי אישי
-        2: "assets/images/prizes/law-books.png",        // חבילת ספרי חקיקה
-        3: "assets/images/prizes/aski-subscription.png",// מנוי שנתי לאתר אסקי
-        4: "assets/images/prizes/ai-course.png",        // קורס מקוון בנושא AI וחדשנות משפטית
-        5: "assets/images/prizes/seminar.png",          // השתתפות ביום עיון מקצועי
-        6: "assets/images/prizes/podcast.png",          // מינוי חצי שנתי לפודקאסט המשפטי
-        7: "assets/images/prizes/book.png",             // ספר "מהפכת הבוררות"
-        8: "assets/images/prizes/pen-set.png"           // סט עטי יוקרה של הלשכה
+        // 1: "assets/images/prizes/legal-advice.png",     // ייעוץ משפטי אישי
+        // 2: "assets/images/prizes/law-books.png",        // חבילת ספרי חקיקה
+        // 3: "assets/images/prizes/aski-subscription.png",// מנוי שנתי לאתר אסקי
+        // 4: "assets/images/prizes/ai-course.png",        // קורס מקוון בנושא AI וחדשנות משפטית
+        // 5: "assets/images/prizes/seminar.png",          // השתתפות ביום עיון מקצועי
+        // 6: "assets/images/prizes/podcast.png",          // מינוי חצי שנתי לפודקאסט המשפטי
+        // 7: "assets/images/prizes/book.png",             // ספר "מהפכת הבוררות"
+        // 8: "assets/images/prizes/pen-set.png"           // סט עטי יוקרה של הלשכה
     };
     
     // החזרת תמונה ספציפית או תמונה כללית אם אין התאמה
-    const imagePath = prizeImages[prizeId] || "assets/images/prizes/prize-generic.png";
+    const imagePath = prizeImages[prizeId] || "assets/images/prizes/default-prize.png";
     console.log('נתיב תמונה לפרס:', imagePath);
     return imagePath;
 }
