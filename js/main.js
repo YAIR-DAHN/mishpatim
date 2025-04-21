@@ -264,6 +264,7 @@ async function handleSpinEnd(prizeIndex) {
             const winData = {
                 userName: currentUser?.name || 'אורח',
                 userEmail: currentUser?.email || 'לא זמין',
+                userPhone: currentUser?.phone || 'לא זמין',
                 prizeId: prize.id || prizeIndex,
                 prizeName: prize.name,
                 timestamp: new Date().toISOString()
