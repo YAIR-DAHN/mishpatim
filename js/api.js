@@ -9,7 +9,7 @@ const API_BASE_URL = '/api';
 const CACHE_DURATION = 60 * 1000; // דקה אחת
 
 // כתובת ה-Apps Script (להחליף ב-URL בפועל לאחר פריסה)
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvsdF_PKMgGAmx5k0sagNrSzuUuZW_nJ3pUtbJEe_nkF8ahQKA0RwlfSG9iYD4W3wN/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXeL998eH5LAuImGIszA1E_SKx30PUMV1jjpdBh4wK1VwwO1dA4fBoCpDXxqKyUAWy/exec';
 
 // האם לכפות שימוש ב-API גם בסביבת פיתוח
 const FORCE_API_IN_DEV = true;

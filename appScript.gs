@@ -9,6 +9,7 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  const ss = SpreadsheetApp.getActive();
   const data = JSON.parse(e.postData.contents);
   if (data.action === 'saveWin') {
     return json(saveWin(ss, data.payload));
