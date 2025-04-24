@@ -2,6 +2,8 @@
  * מודול לניהול גלגל המזל
  */
 
+import { getRandomPrize } from './api.js';
+
 // משתנים גלובליים
 let wheelCanvas = null;
 let wheelCtx = null;
@@ -69,8 +71,12 @@ function drawWheel() {
     
     // ציור המקטעים
     for (let i = 0; i < prizes.length; i++) {
+        const prize = prizes[i];
         const angle = i * arc + currentRotation;
         const nextAngle = (i + 1) * arc + currentRotation;
+        
+        // בדיקה האם הפרס זמין
+        const isAvailable = (prize.stock || 0) > (prize.distributed || 0) && prize.probability > 0;
         
         // ציור מקטע
         wheelCtx.beginPath();
@@ -78,19 +84,26 @@ function drawWheel() {
         wheelCtx.arc(centerX, centerY, radius, angle, nextAngle);
         wheelCtx.closePath();
         
-        // בחירת צבעים מתחלפים בגלגל
-        const colorIndex = i % 3;
+        // בחירת צבעים בהתאם לזמינות
         let primaryColor, secondaryColor;
         
-        if (colorIndex === 0) {
-            primaryColor = '#1e3a8a';  // כחול כהה (לשכה)
-            secondaryColor = '#1e40af'; // כחול כהה יותר
-        } else if (colorIndex === 1) {
-            primaryColor = '#0891b2';  // ציאן
-            secondaryColor = '#0e7490'; // ציאן כהה
+        if (!isAvailable) {
+            // צבעים לפרס לא זמין
+            primaryColor = '#9E9E9E';    // אפור בהיר
+            secondaryColor = '#757575';  // אפור כהה
         } else {
-            primaryColor = '#1d4ed8';  // כחול רויאל
-            secondaryColor = '#1e3a8a'; // כחול נייבי
+            // צבעים לפרס זמין - מתחלפים לפי האינדקס
+            const colorIndex = i % 3;
+            if (colorIndex === 0) {
+                primaryColor = '#1e3a8a';   // כחול כהה (לשכה)
+                secondaryColor = '#1e40af';  // כחול כהה יותר
+            } else if (colorIndex === 1) {
+                primaryColor = '#0891b2';   // ציאן
+                secondaryColor = '#0e7490';  // ציאן כהה
+            } else {
+                primaryColor = '#1d4ed8';   // כחול רויאל
+                secondaryColor = '#1e3a8a';  // כחול נייבי
+            }
         }
         
         // יצירת גרדיאנט
@@ -116,7 +129,7 @@ function drawWheel() {
         wheelCtx.rotate(angle + arc / 2);
         
         wheelCtx.textAlign = 'right';
-        wheelCtx.fillStyle = '#ffffff';
+        wheelCtx.fillStyle = isAvailable ? '#ffffff' : '#E0E0E0';  // טקסט בהיר יותר לפרסים לא זמינים
         wheelCtx.font = 'bold 14px Heebo, Arial';
         wheelCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
         wheelCtx.shadowBlur = 2;
@@ -245,81 +258,84 @@ function startSpinSound() {
  * סיבוב הגלגל
  */
 export function spinWheel() {
-    if (isSpinning) return;
-    
-    isSpinning = true;
-    
-    // נגינת צליל התחלה
-    if (audioContext) {
-        playTickSound(500, 0.3);
-        
-        // התחלת רצף צלילי הסיבוב
-        setTimeout(startSpinSound, 300);
-    }
-    
-    // בחירה אקראית של מספר הסיבובים (בין 3 ל-5 סיבובים מלאים)
-    const numRotations = 3 + Math.random() * 2;
-    const totalAngle = numRotations * Math.PI * 2;
-    
-    // בחירה אקראית של עצירה על פרס ספציפי
-    const selectedPrizeIndex = Math.floor(Math.random() * prizes.length);
-    const arc = Math.PI * 2 / prizes.length;
-    const targetAngle = selectedPrizeIndex * arc;
-    
-    // חישוב הזווית הסופית (מספר סיבובים מלאים + הזווית של הפרס הנבחר)
-    const finalAngle = totalAngle + targetAngle;
-    
-    // הגדרת זמן הסיבוב (בין 4 ל-6 שניות)
-    const spinDuration = 4000 + Math.random() * 2000;
-    
-    // הגדרת פרמטרים לאנימציה
-    const startTime = Date.now();
-    const startAngle = currentRotation;
-    
-    // פונקציית האנימציה
-    const animate = () => {
-        const now = Date.now();
-        const elapsed = now - startTime;
-        
-        // חישוב ההתקדמות באנימציה (0-1)
-        const progress = Math.min(1, elapsed / spinDuration);
-        
-        // הפונקציה להאטה - מתחיל מהר ומאט בסוף (easeOutCubic)
-        const easeOut = (t) => 1 - Math.pow(1 - t, 3);
-        
-        // חישוב הזווית הנוכחית
-        currentRotation = startAngle + easeOut(progress) * finalAngle;
-        
-        // ציור הגלגל
-        drawWheel();
-        
-        // המשך האנימציה אם לא הסתיימה
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            // סיום הסיבוב
-            finishSpin(selectedPrizeIndex);
-        }
-    };
-    
-    // התחלת האנימציה
-    requestAnimationFrame(animate);
-    
-    // הגדרת טיימר בטיחות - אם מסיבה כלשהי האנימציה לא מסתיימת כראוי
-    clearTimeout(spinTimeout);
-    spinTimeout = setTimeout(() => {
+    return new Promise((resolve, reject) => {
         if (isSpinning) {
-            const randomIndex = Math.floor(Math.random() * prizes.length);
-            finishSpin(randomIndex);
+            showError('הגלגל כבר מסתובב, אנא המתן');
+            reject(new Error('הגלגל כבר מסתובב'));
+            return;
         }
-    }, spinDuration + 1000); // זמן הסיבוב + מרווח בטיחות
+
+        // בדיקה האם יש פרסים זמינים לפני התחלת הסיבוב
+        const availablePrizes = prizes.filter(prize => 
+            (prize.stock || 0) > (prize.distributed || 0) && 
+            (prize.probability || 0) > 0
+        );
+
+        if (availablePrizes.length === 0) {
+            showError('מצטערים, כל הפרסים חולקו! תודה על השתתפותכם');
+            reject(new Error('אין פרסים זמינים'));
+            return;
+        }
+
+        isSpinning = true;
+        
+        // נגינת צליל התחלה
+        if (audioContext) {
+            playTickSound(500, 0.3);
+            // התחלת רצף צלילי הסיבוב
+            setTimeout(startSpinSound, 300);
+        }
+
+        // קבלת פרס אקראי מה-API
+        const selectedPrize = getRandomPrize();
+        if (!selectedPrize) {
+            isSpinning = false;
+            showError('מצטערים, אירעה שגיאה בבחירת הפרס. אנא נסו שוב');
+            reject(new Error('לא נמצא פרס זמין'));
+            return;
+        }
+
+        // מציאת האינדקס של הפרס בגלגל
+        const prizeIndex = prizes.findIndex(p => p.id === selectedPrize.id);
+        if (prizeIndex === -1) {
+            isSpinning = false;
+            reject(new Error('הפרס שנבחר לא נמצא בגלגל'));
+            return;
+        }
+
+        // חישוב הזווית הסופית
+        const segmentAngle = 360 / prizes.length;
+        const finalAngle = 360 * 5 + (360 - (prizeIndex * segmentAngle) - (segmentAngle / 2)); // 5 סיבובים מלאים + הזווית לפרס
+        
+        // אנימציית הסיבוב
+        const startTime = performance.now();
+        const spinDuration = 5; // 5 שניות
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / (spinDuration * 1000), 1);
+            
+            // פונקציית האטה
+            const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+            currentRotation = easeOut(progress) * finalAngle;
+            
+            drawWheel();
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                finishSpin(prizeIndex, resolve);
+            }
+        };
+        
+        requestAnimationFrame(animate);
+    });
 }
 
 /**
  * סיום סיבוב הגלגל
  * @param {number} prizeIndex - אינדקס הפרס הזוכה
  */
-function finishSpin(prizeIndex) {
+function finishSpin(prizeIndex, resolve) {
     isSpinning = false;
     
     // ניגון צליל זכייה
@@ -340,6 +356,8 @@ function finishSpin(prizeIndex) {
             spinEndCallback(prizeIndex);
         }, 500);
     }
+    
+    resolve(prizes[prizeIndex]);
 }
 
 /**
@@ -355,4 +373,21 @@ export function resetWheel() {
     }
     
     drawWheel();
+}
+
+/**
+ * הצגת הודעת שגיאה למשתמש
+ * @param {string} message - הודעת השגיאה להצגה
+ */
+function showError(message) {
+    const errorContainer = document.getElementById('error-container');
+    if (errorContainer) {
+        errorContainer.textContent = message;
+        errorContainer.classList.remove('hidden');
+        
+        // הסתרת ההודעה אחרי 5 שניות
+        setTimeout(() => {
+            errorContainer.classList.add('hidden');
+        }, 5000);
+    }
 }

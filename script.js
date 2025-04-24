@@ -114,7 +114,7 @@ function getRandomPrizeIndex() {
     // מגריל מספר בין 0 ל-100
     const randomValue = Math.random() * 100;
     
-    // מוצא את האינדקס של הפרס שבו נעצרה ההגרלה
+    // מוצא את האינדקס של הפרס שבו נעצרה ההטבה
     for (let i = 0; i < probabilities.length; i++) {
         if (randomValue <= probabilities[i]) {
             return i;

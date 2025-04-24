@@ -51,13 +51,21 @@ function doPost(e) {
 function getPrizesSheet(ss) {
   const sheet = ss.getSheetByName('פרסים');
   if (!sheet) return [];
-  return sheet.getDataRange().getValues().slice(1).map(r => ({
-    id: r[0],
-    name: r[1],
-    probability: r[2],
-    stock: r[3] || 1,
-    distributed: r[4] || 0
-  })).filter(p => (p.stock || 1) > (p.distributed || 0));
+  
+  // החזרת כל הפרסים, כולל אלה שאזלו מהמלאי
+  return sheet.getDataRange().getValues().slice(1).map(r => {
+    const stock = r[3] || 0;
+    const distributed = r[4] || 0;
+    
+    return {
+      id: r[0],
+      name: r[1],
+      probability: r[2] || 0,  // הסתברות ברירת מחדל 0
+      stock: stock,
+      distributed: distributed,
+      isOutOfStock: stock <= distributed  // שדה חדש שמציין האם הפרס אזל
+    };
+  });
 }
 
 function saveWin(ss, win) {

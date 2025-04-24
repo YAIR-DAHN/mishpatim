@@ -127,7 +127,7 @@ class EmailSender {
                 },
                 body: JSON.stringify({
                     to: user.email,
-                    subject: `ברכות! זכית בפרס: ${prize.name} - הלשכת עורכי הדין`,
+                    subject: `ברכות! זכית בפרס: ${prize.name} - ההוצאה לאור של לשכת עורכי הדין`,
                     html: htmlContent
                 })
             });
