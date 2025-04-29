@@ -7,7 +7,7 @@
  */
 
 const APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbySjROrVtf37DK2qqUrrPJJZsTQBppCDpqQgxmPnv_aY6JwlJ3B8-J5CbEIw0KnQWGi/exec';
+  'https://script.google.com/macros/s/AKfycbwh0D-4MlxqEuJOwBw9ChWggvrf49A2ivxZD7-3ZuG-h3Us-mYzuu7jTyNBDBKAqO9e/exec';
 
 const CACHE_DURATION = 10_000;          // 10 שניות
 const FORCE_API_IN_DEV = true;          // אל תשתמש בדמה גם ב‑localhost
@@ -64,20 +64,48 @@ export async function saveWinningRecord(winRecord) {
     return { success: true, id: `mock-${Date.now()}` };
   }
 
-  const payload = JSON.stringify({ action: 'saveWin', payload: winRecord });
-
-  const res = await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    redirect: 'follow',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: payload
+  const payload = JSON.stringify({ 
+    action: 'saveWin', 
+    payload: {
+      userName: winRecord.userName,
+      userEmail: winRecord.userEmail,
+      userPhone: winRecord.userPhone,
+      prizeId: winRecord.prizeId,
+      prizeName: winRecord.prizeName
+    } 
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-  // איפוס המטמון אחרי זכייה כדי לקבל נתונים מעודכנים
-  invalidateCache();
-  
-  return res.json();
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: payload
+    });
+    
+    if (!res.ok) {
+      console.error('שגיאת רשת (fetch):', res.status, res.statusText);
+      throw new Error(`HTTP ${res.status}`);
+    }
+    
+    // איפוס המטמון אחרי זכייה כדי לקבל נתונים מעודכנים
+    invalidateCache();
+    
+    const data = await res.json();
+    if (data.success) {
+      console.log('השרת החזיר הצלחה:', data);
+    } else {
+      console.error('השרת החזיר שגיאה:', data);
+    }
+    if (!data.success) {
+      throw new Error(data.error || 'שגיאה בשמירת הזכייה');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('שגיאה בשמירת הזכייה (client):', error);
+    throw error;
+  }
 }
 
 /* ---------- GET / getSettings ---------- */
