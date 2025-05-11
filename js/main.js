@@ -4,7 +4,7 @@
  */
 
 import { initWheel, spinWheel, isSpinning } from './wheel.js';
-import { getPrizes, saveWinningRecord, getSettings } from './api.js';
+import { getPrizes, saveWinningRecord, getSettings, clearPrizesCache } from './api.js';
 import EmailSender from './email-sender.js';
 
 // משתנים גלובליים
@@ -199,13 +199,24 @@ function isValidPhone(phone) {
 /**
  * התחלת סיבוב הגלגל
  */
-function startSpin() {
-    const spinButton = document.getElementById('spin-button');
-    spinButton.disabled = true;
-    spinButton.textContent = 'מסתובב...';
+function handleSpinClick() {
+    // וידוא שלא מסתובב כבר
+    if (isSpinning) return;
     
-    // הסתרת הודעות קודמות
-    document.getElementById('result-container').classList.add('hidden');
+    const spinButton = document.getElementById('spin-button');
+    if (spinButton) {
+        spinButton.disabled = true;
+        spinButton.textContent = 'מסתובב...';
+    }
+    
+    // ניקוי תוצאות קודמות
+    const resultContainer = document.getElementById('result-container');
+    if (resultContainer) {
+        resultContainer.classList.add('hidden');
+        // הסרת כפתורים קודמים של התחלה מחדש
+        const oldRestartButtons = resultContainer.querySelectorAll('.restart-button');
+        oldRestartButtons.forEach(btn => btn.remove());
+    }
     
     // הפעלת הגלגל
     spinWheel();
@@ -261,20 +272,40 @@ async function handleSpinEnd(prizeIndex) {
         
         // ניסיון לשמור את הזכייה ב-API
         try {
+            // הכנת נתוני המשתמש לשליחה
             const winData = {
-                userName: currentUser?.name || 'אורח',
-                userEmail: currentUser?.email || 'לא זמין',
-                userPhone: currentUser?.phone || 'לא זמין',
+                userName: currentUser?.name || '',
+                userEmail: currentUser?.email || '',
+                userPhone: currentUser?.phone || '',
                 prizeId: prize.id || prizeIndex,
                 prizeName: prize.name,
                 timestamp: new Date().toISOString()
             };
             
-            console.log('שומר נתוני זכייה:', winData);
+            // לוגים ניפוי באגים מפורטים
+            console.group('נתוני שמירת זכייה:');
+            console.log('שם משתמש:', winData.userName);
+            console.log('דוא"ל:', winData.userEmail);
+            console.log('טלפון:', winData.userPhone);
+            console.log('מזהה פרס:', winData.prizeId);
+            console.log('שם פרס:', winData.prizeName);
+            console.log('זמן:', winData.timestamp);
+            console.groupEnd();
+            
+            // נעטוף את הנתונים בבלוק try נוסף כדי לתפוס שגיאה ספציפית
+            console.log('שולח בקשה לשמירת זכייה...');
             const result = await saveWinningRecord(winData);
-            console.log('הזכייה נשמרה בהצלחה, תשובה:', result);
+            console.log('תשובה משרת:', result);
+            
+            if (result.success) {
+                console.log('הזכייה נשמרה בהצלחה!');
+            } else {
+                console.error('שגיאה בשמירת הזכייה:', result.error);
+                showError('אירעה שגיאה בשמירת הזכייה: ' + result.error);
+            }
         } catch (error) {
-            console.error('שגיאה בשמירת הזכייה:', error);
+            console.error('שגיאה בשמירת הזכייה (כללי):', error);
+            showError('אירעה שגיאה בשמירת הזכייה. אנא נסו שוב מאוחר יותר.');
         }
     }
 }
@@ -282,7 +313,7 @@ async function handleSpinEnd(prizeIndex) {
 /**
  * מתחיל את האפליקציה מחדש - מחזיר את המשתמש לדף הראשון
  */
-function restartApp() {
+async function restartApp() {
     const userSection = document.getElementById('user-section');
     const wheelSection = document.getElementById('wheel-section');
     const resultScreen = document.getElementById('result-screen');
@@ -292,50 +323,101 @@ function restartApp() {
         return;
     }
     
-    // אנימציית יציאה למסך הנוכחי (תוצאה)
-    resultScreen.style.opacity = '1';
-    resultScreen.style.transform = 'translateY(0)';
-    resultScreen.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-    
-    // התחלת אנימציית יציאה
-    setTimeout(() => {
-        resultScreen.style.opacity = '0';
-        resultScreen.style.transform = 'translateY(-20px)';
+    try {
+        // ניקוי קאש הפרסים
+        clearPrizesCache();
         
-        // בסיום אנימציית היציאה, החלפת המסכים
+        // טעינה מחדש של רשימת הפרסים מה-API
+        console.log('טוען מחדש רשימת פרסים...');
+        const newPrizes = await getPrizes();
+        if (!newPrizes || newPrizes.length === 0) {
+            throw new Error('לא התקבלו פרסים מה-API');
+        }
+        
+        // עדכון מערך הפרסים הגלובלי
+        prizes = newPrizes;
+        console.log('רשימת הפרסים עודכנה:', prizes);
+        
+        // אתחול מחדש של גלגל המזל עם הנתונים המעודכנים
+        const wheelCanvas = document.getElementById('wheel-canvas');
+        if (wheelCanvas) {
+            // ניקוי הקנבס
+            const ctx = wheelCanvas.getContext('2d');
+            ctx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+            
+            // אתחול מחדש של הגלגל
+            initWheel(prizes, handleSpinEnd);
+        }
+        
+        // איפוס משתנים גלובליים
+        currentUser = null;
+        
+        // אנימציית יציאה למסך הנוכחי (תוצאה)
+        resultScreen.style.opacity = '1';
+        resultScreen.style.transform = 'translateY(0)';
+        resultScreen.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        
+        // התחלת אנימציית יציאה
         setTimeout(() => {
-            // הסתרת מסכים נוכחיים
-            wheelSection.classList.add('hidden');
-            resultScreen.classList.add('hidden');
-            resultScreen.style.opacity = '';
-            resultScreen.style.transform = '';
+            resultScreen.style.opacity = '0';
+            resultScreen.style.transform = 'translateY(-20px)';
             
-            // הכנת מסך הטופס לכניסה
-            userSection.classList.remove('hidden');
-            userSection.style.opacity = '0';
-            userSection.style.transform = 'translateY(20px)';
-            userSection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-            
-            // התחלת אנימציית כניסה למסך הטופס
+            // בסיום אנימציית היציאה, החלפת המסכים
             setTimeout(() => {
-                userSection.style.opacity = '1';
-                userSection.style.transform = 'translateY(0)';
+                // הסתרת מסכים נוכחיים
+                wheelSection.classList.add('hidden');
+                resultScreen.classList.add('hidden');
+                resultScreen.style.opacity = '';
+                resultScreen.style.transform = '';
                 
-                // ניקוי סגנונות בסיום האנימציה
+                // הכנת מסך הטופס לכניסה
+                userSection.classList.remove('hidden');
+                userSection.style.opacity = '0';
+                userSection.style.transform = 'translateY(20px)';
+                userSection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                
+                // התחלת אנימציית כניסה למסך הטופס
                 setTimeout(() => {
-                    userSection.style.opacity = '';
-                    userSection.style.transform = '';
-                    userSection.style.transition = '';
+                    userSection.style.opacity = '1';
+                    userSection.style.transform = 'translateY(0)';
                     
-                    // איפוס הטופס
-                    const form = document.getElementById('user-form');
-                    if (form) {
-                        form.reset();
-                    }
-                }, 500);
-            }, 50);
+                    // ניקוי סגנונות בסיום האנימציה
+                    setTimeout(() => {
+                        userSection.style.opacity = '';
+                        userSection.style.transform = '';
+                        userSection.style.transition = '';
+                        
+                        // איפוס הטופס
+                        const form = document.getElementById('user-form');
+                        if (form) {
+                            form.reset();
+                        }
+                        
+                        // איפוס תמונת הפרס
+                        const resultImage = document.getElementById('result-image');
+                        if (resultImage) {
+                            resultImage.src = 'assets/images/prizes/default-prize.png';
+                        }
+                        
+                        // איפוס תיאור הפרס
+                        const resultDescription = document.getElementById('result-description');
+                        if (resultDescription) {
+                            resultDescription.textContent = 'תיאור הפרס יופיע כאן';
+                        }
+                        
+                        // איפוס כותרת התוצאה
+                        const resultTitle = document.getElementById('result-title');
+                        if (resultTitle) {
+                            resultTitle.textContent = 'ברכות! זכית בפרס';
+                        }
+                    }, 500);
+                }, 50);
             }, 500);
-    }, 50);
+        }, 50);
+    } catch (error) {
+        console.error('שגיאה בטעינה מחדש של רשימת הפרסים:', error);
+        showError('אירעה שגיאה בטעינה מחדש של רשימת הפרסים. אנא נסו שוב.');
+    }
 }
 
 /**
@@ -454,32 +536,6 @@ function isElementInViewport(element) {
         rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
         rect.right <= (window.innerWidth || document.documentElement.clientWidth)
     );
-}
-
-/**
- * טיפול בלחיצה על כפתור הסיבוב
- */
-function handleSpinClick() {
-    // וידוא שלא מסתובב כבר
-    if (isSpinning) return;
-    
-    const spinButton = document.getElementById('spin-button');
-    if (spinButton) {
-        spinButton.disabled = true;
-        spinButton.textContent = 'מסתובב...';
-    }
-    
-    // ניקוי תוצאות קודמות
-    const resultContainer = document.getElementById('result-container');
-    if (resultContainer) {
-        resultContainer.classList.add('hidden');
-        // הסרת כפתורים קודמים של התחלה מחדש
-        const oldRestartButtons = resultContainer.querySelectorAll('.restart-button');
-        oldRestartButtons.forEach(btn => btn.remove());
-    }
-    
-    // הפעלת הגלגל
-    spinWheel();
 }
 
 /**

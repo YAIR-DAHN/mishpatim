@@ -1,0 +1,11 @@
+# Google Apps Script files
+*.gs
+appScript*.gs
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db 

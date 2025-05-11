@@ -7,7 +7,8 @@
  */
 
 const APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbzwx7kUbjcfjzQl2KollWtnNq3HnFZ3E0LdX_zz8G5h31HX4B62TsBf5g46qd4m6VC7/exec';
+  'https://script.google.com/macros/s/AKfycbzV7S3D_tgdL_F-yTUd3jx2Q0FsgvXbTRzHyEXacbk24xsf--gWvpJJ3aIJzmST4Z6B/exec';
+
 const CACHE_DURATION = 10_000;          // 10 שניות
 const FORCE_API_IN_DEV = true;          // אל תשתמש בדמה גם ב‑localhost
 
@@ -60,7 +61,6 @@ export async function getPrizes() {
 /* ---------- POST / saveWin ---------- */
 export async function saveWinningRecord(winRecord) {
   if (shouldUseMockData()) {
-    console.log('משתמש בנתוני דמה (מוק) עבור שמירת זכייה');
     return { success: true, id: `mock-${Date.now()}` };
   }
 
@@ -74,12 +74,8 @@ export async function saveWinningRecord(winRecord) {
       prizeName: winRecord.prizeName
     } 
   });
-  
-  console.log('שולח בקשה לשרת AppScript:', APPS_SCRIPT_URL);
-  console.log('תוכן הבקשה:', payload);
 
   try {
-    console.log('מבצע בקשת fetch...');
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       redirect: 'follow',
@@ -92,35 +88,15 @@ export async function saveWinningRecord(winRecord) {
       throw new Error(`HTTP ${res.status}`);
     }
     
-    console.log('התקבלה תשובה, מנתח תוכן JSON...');
-    const data = await res.json();
-    
     // איפוס המטמון אחרי זכייה כדי לקבל נתונים מעודכנים
     invalidateCache();
     
-    // פענוח התשובה מהשרת
+    const data = await res.json();
     if (data.success) {
       console.log('השרת החזיר הצלחה:', data);
     } else {
       console.error('השרת החזיר שגיאה:', data);
-      // אם יש שגיאה ספציפית על המייל, תציג אותה בצורה מפורטת
-      if (data.error && data.error.includes('שגיאה בשליחת המייל')) {
-        try {
-          // מנסה לחלץ את פרטי השגיאה מה-JSON
-          const errorMatch = data.error.match(/\{.*\}/);
-          if (errorMatch) {
-            const errorJson = JSON.parse(errorMatch[0]);
-            console.error('פירוט שגיאת מייל:', errorJson);
-            if (errorJson.Error) {
-              console.error('הודעת שגיאה מ-Elastic Email:', errorJson.Error);
-            }
-          }
-        } catch (jsonError) {
-          console.error('לא ניתן היה לפענח את פרטי השגיאה');
-        }
-      }
     }
-    
     if (!data.success) {
       throw new Error(data.error || 'שגיאה בשמירת הזכייה');
     }
@@ -128,12 +104,7 @@ export async function saveWinningRecord(winRecord) {
     return data;
   } catch (error) {
     console.error('שגיאה בשמירת הזכייה (client):', error);
-    // הוספת פירוט השגיאה לאובייקט המוחזר
-    return { 
-      success: false, 
-      error: error.toString(),
-      details: error.message || 'אין פרטים נוספים'
-    };
+    throw error;
   }
 }
 
@@ -193,12 +164,4 @@ export function getRandomPrize() {
 /* ---------- Utility: בדיקה האם פרס זמין ---------- */
 export function isPrizeAvailable(prize) {
   return (prize.stock || 0) > (prize.distributed || 0) && prize.probability > 0;
-}
-
-/**
- * מנקה את קאש הפרסים
- */
-export function clearPrizesCache() {
-  console.log('ניקוי קאש פרסים');
-  prizesCache = { data: null, timestamp: 0 };
 }
