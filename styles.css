@@ -196,25 +196,95 @@ body {
     text-align: center;
 }
 
+/* מבנה חדש - סידור הגלגל והכפתור */
+.wheel-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin: 20px auto;
+    transition: all 0.5s ease;
+}
+
 .wheel-container {
-    margin: 30px auto;
     position: relative;
-    max-width: 400px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    /* box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3); */
     border-radius: 50%;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, max-width 0.5s ease;
 }
 
 .wheel-container:hover {
     transform: scale(1.02);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    /* box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4); */
 }
 
 canvas#wheel-canvas {
     display: block;
     margin: 0 auto;
     border-radius: 50%;
+    transition: width 0.5s ease, height 0.5s ease;
+}
+
+/* עיצוב אזור כפתור הסיבוב */
+.spin-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    transition: all 0.5s ease;
+}
+
+.spin-button {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: all 0.4s ease;
+    padding: 18px 30px;
+    width: auto;
+    min-width: 200px;
+    font-size: 1.2rem;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #1a237e, #0891b2);
+    border-radius: 50px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.spin-button:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #ff4081, #e91e63);
+    z-index: -1;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s ease;
+}
+
+.spin-button:hover:before {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.spin-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+}
+
+.spin-button:after {
+    content: '🎯';
+    margin-right: 10px;
+    font-size: 1.4rem;
 }
 
 /* עיצוב תוצאות */
@@ -341,8 +411,38 @@ canvas#wheel-canvas {
         padding: 20px;
     }
     
+    .wheel-layout {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
     .wheel-container {
-        max-width: 300px;
+        max-width: 350px;
+    }
+    
+    canvas#wheel-canvas {
+        width: 350px;
+        height: 350px;
+    }
+    
+    .spin-container {
+        align-items: center;
+        padding: 15px 10px;
+    }
+    
+    .spin-button {
+        margin-top: 15px;
+        margin-bottom: 0;
+        width: 100%;
+        max-width: 280px;
+        padding: 15px 20px;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(26, 35, 126, 0.4); }
+        70% { box-shadow: 0 0 0 15px rgba(26, 35, 126, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(26, 35, 126, 0); }
     }
 }
 
@@ -673,148 +773,3 @@ canvas#wheel-canvas {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(var(--final-rotation)); }
 }
-
-/* כפתור סיבוב */
-.spin-button {
-    margin-top: 30px;
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-    transition: all 0.4s ease;
-}
-
-.spin-button:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, #ff4081, #e91e63);
-    z-index: -1;
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.4s ease;
-}
-
-.spin-button:hover:before {
-    transform: scaleX(1);
-    transform-origin: left;
-}
-
-.spin-button:disabled {
-    opacity: 0.7;
-    cursor: wait;
-}
-
-/* כפתור אישור תנאי שימוש */
-.form-actions {
-    margin-top: 30px;
-}
-
-.submit-btn {
-    position: relative;
-    overflow: hidden;
-    padding: 15px 30px;
-    background: linear-gradient(45deg, #1a237e, #0891b2);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.4s ease;
-    box-shadow: 0 6px 15px rgba(26, 35, 126, 0.3);
-    width: 100%;
-    max-width: 300px;
-    margin: 0 auto;
-    display: block;
-}
-
-.submit-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: all 0.6s ease;
-}
-
-.submit-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(26, 35, 126, 0.4);
-    background: linear-gradient(45deg, #0891b2, #1a237e);
-}
-
-.submit-btn:hover::before {
-    left: 100%;
-}
-
-.submit-btn:active {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 10px rgba(26, 35, 126, 0.3);
-}
-
-/* עיצוב תיבת הסימון של תנאי השימוש */
-.form-group label[for="terms-checkbox"] {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-weight: normal;
-    padding: 10px 15px;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    background-color: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.form-group label[for="terms-checkbox"]:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.03);
-}
-
-.form-group input[type="checkbox"] {
-    width: auto;
-    margin-left: 15px;
-    cursor: pointer;
-    transform: scale(1.5);
-    accent-color: #1a237e;
-    transition: all 0.3s ease;
-}
-
-.form-group input[type="checkbox"]:checked + a {
-    font-weight: 600;
-}
-
-.form-group #terms-link {
-    color: #0891b2;
-    text-decoration: none;
-    margin-right: 6px;
-    font-weight: 500;
-    transition: all 0.3s;
-    position: relative;
-    padding-bottom: 2px;
-}
-
-.form-group #terms-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background-color: #1a237e;
-    transition: width 0.3s ease;
-}
-
-.form-group #terms-link:hover {
-    color: #1a237e;
-}
-
-.form-group #terms-link:hover::after {
-    width: 100%;
-} 

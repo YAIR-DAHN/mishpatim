@@ -7,7 +7,7 @@
  */
 
 const APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbzwx7kUbjcfjzQl2KollWtnNq3HnFZ3E0LdX_zz8G5h31HX4B62TsBf5g46qd4m6VC7/exec';
+  'https://script.google.com/macros/s/AKfycbzWgiUArEfmDUR6Rh-f_pc4ul7w4f3qbE4HdZdgq0LLmHtPuCLcAqLYrz09FB86Pag1/exec';
 const CACHE_DURATION = 10_000;          // 10 שניות
 const FORCE_API_IN_DEV = true;          // אל תשתמש בדמה גם ב‑localhost
 
@@ -71,7 +71,9 @@ export async function saveWinningRecord(winRecord) {
       userEmail: winRecord.userEmail,
       userPhone: winRecord.userPhone,
       prizeId: winRecord.prizeId,
-      prizeName: winRecord.prizeName
+      prizeName: winRecord.prizeName,
+      redemptionMethod: winRecord.redemptionMethod || '',
+      validityTerms: winRecord.validityTerms || ''
     } 
   });
   

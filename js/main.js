@@ -244,10 +244,10 @@ async function handleSpinEnd(prizeIndex) {
     
     if (resultTitle && resultDescription && resultImage) {
         // הגדרת כותרת הפרס
-        resultTitle.textContent = `ברכות! זכית ב${prize.name}`;
+        resultTitle.textContent = ` ברכות! זכית ב - ${prize.name}`;
         
         // הגדרת תיאור הפרס
-        resultDescription.textContent = prize.description || `זכית ב${prize.name}. פרטי הזכייה והמימוש נשלחו בדוא"ל.`;
+        resultDescription.textContent = prize.description || `פרטי הזכייה והמימוש נשלחו בדוא"ל.`;
         
         // הגדרת תמונת הפרס
         const prizeId = prize.id || prizeIndex;
@@ -267,7 +267,7 @@ async function handleSpinEnd(prizeIndex) {
         const spinButton = document.getElementById('spin-button');
         if (spinButton) {
             spinButton.disabled = false;
-            spinButton.textContent = 'סובב את הגלגל';
+            spinButton.textContent = 'אני לא שופט אתה יכול לסובב אותי :)';
         }
         
         // ניסיון לשמור את הזכייה ב-API
@@ -279,6 +279,8 @@ async function handleSpinEnd(prizeIndex) {
                 userPhone: currentUser?.phone || '',
                 prizeId: prize.id || prizeIndex,
                 prizeName: prize.name,
+                redemptionMethod: prize.redemptionMethod || '',
+                validityTerms: prize.validityTerms || '',
                 timestamp: new Date().toISOString()
             };
             
@@ -289,6 +291,8 @@ async function handleSpinEnd(prizeIndex) {
             console.log('טלפון:', winData.userPhone);
             console.log('מזהה פרס:', winData.prizeId);
             console.log('שם פרס:', winData.prizeName);
+            console.log('אופן מימוש:', winData.redemptionMethod);
+            console.log('תוקף/הגבלות:', winData.validityTerms);
             console.log('זמן:', winData.timestamp);
             console.groupEnd();
             

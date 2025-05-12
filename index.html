@@ -57,15 +57,22 @@
 
         <!-- מסך גלגל המזל -->
         <section id="wheel-section" class="section wheel-section hidden">
-            <div class="card">
+            <div class="card wheel-card">
                 <h2>סובבו את הגלגל וגלו מה הפרס שלכם!</h2>
                 
-                <div class="wheel-container">
-                    <canvas id="wheel-canvas" width="400" height="400"></canvas>
-                </div>
-                
-                <div class="spin-container">
-                    <button id="spin-button" class="btn primary-btn spin-button">אני לא שופט, אתה יכול לסובב אותי :)</button>
+                <div class="wheel-layout">
+                    <div class="wheel-container">
+                        <div class="wheel-shadow-container">
+                            <div class="wheel-shadow"></div>
+                        </div>
+                        <canvas id="wheel-canvas" width="600" height="600"></canvas>
+                    </div>
+                    
+                    <div class="spin-container">
+                        <button id="spin-button" class="spin-button">אני לא שופט
+אתה יכול לסובב אותי :)</button>
+                        <p class="spin-help">לחצו על הכפתור כדי להתחיל</p>
+                    </div>
                 </div>
                 
                 <!-- הודעת שגיאה -->
@@ -94,7 +101,7 @@
 
         <!-- מסך תחתון -->
         <footer class="footer">
-            <p>© כל הזכויות שמורות להוצאה לאור של לשכת עורכי הדין בע"מ 2024</p>
+            <p>© כל הזכויות שמורות להוצאה לאור של לשכת עורכי הדין בע"מ 2025</p>
             <p class="disclaimer">בכפוף לתקנון ההטבה. להוצאה לאור של לשכת עורכי הדין שמורה הזכות לשנות את תנאי ההטבה בכל עת. ט.ל.ח.</p>
             <p class="contact-info">
                 לפניות ושאלות: <a href="mailto:support@lawpub.odoo.com">support@lawpub.odoo.com</a> | 
