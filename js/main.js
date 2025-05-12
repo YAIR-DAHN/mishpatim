@@ -247,7 +247,7 @@ async function handleSpinEnd(prizeIndex) {
         resultTitle.textContent = `ברכות! זכית ב${prize.name}`;
         
         // הגדרת תיאור הפרס
-        resultDescription.textContent = prize.description || `זכית ב${prize.name}. נציג מטעמנו יצור איתך קשר בהקדם.`;
+        resultDescription.textContent = prize.description || `זכית ב${prize.name}. פרטי הזכייה והמימוש נשלחו בדוא"ל.`;
         
         // הגדרת תמונת הפרס
         const prizeId = prize.id || prizeIndex;
