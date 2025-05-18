@@ -297,7 +297,7 @@ if (spinAgainBtn) {
 
 const restartBtn = document.createElement('button');
 restartBtn.className = 'submit-btn';
-restartBtn.textContent = 'התחל מחדש';
+restartBtn.textContent = 'הבא בתור בבקשה!';
 restartBtn.style.marginTop = '20px';
 restartBtn.onclick = function() {
     location.reload();

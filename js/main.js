@@ -4,7 +4,7 @@
  */
 
 import { initWheel, spinWheel, isSpinning } from './wheel.js';
-import { getPrizes, saveWinningRecord, getSettings, clearPrizesCache } from './api.js';
+import { getPrizes, saveWinningRecord, getSettings, clearPrizesCache, checkPhoneExists } from './api.js';
 import EmailSender from './email-sender.js';
 
 // משתנים גלובליים
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async function() {
  * מטפל בהגשת טופס המשתמש
  * @param {Event} event - אירוע הטופס
  */
-function handleUserSubmit(event) {
+async function handleUserSubmit(event) {
     event.preventDefault();
     
     // וידוא שכל האלמנטים קיימים
@@ -111,17 +111,74 @@ function handleUserSubmit(event) {
         return;
     }
     
-    // שמירת פרטי המשתמש
-    currentUser = {
+    // נשמור זמנית את פרטי המשתמש
+    const userDetails = {
         name: nameInput.value.trim(),
         email: emailInput.value.trim(),
         phone: phoneInput.value.trim()
     };
     
-    console.log('נתוני משתמש:', currentUser);
+    console.log('מבצע בדיקה אם המשתמש כבר קיים במערכת...');
     
-    // מעבר למסך הגלגל עם אנימציה
-    transitionToWheelScreen();
+    // בדיקה מול השרת האם המשתמש כבר זכה (לפי מספר טלפון)
+    try {
+        const response = await checkPhoneExists(userDetails.phone);
+        console.log('תוצאת בדיקת טלפון:', response);
+        
+        if (response.exists) {
+            // במקום להציג שגיאה סטנדרטית, נציג הודעה מותאמת וכפתור התחל מחדש
+            displayAlreadyParticipatedMessage(userDetails.name);
+            return;
+        }
+        
+        // אם הטלפון לא קיים, נמשיך בתהליך
+        currentUser = userDetails;
+        console.log('נתוני משתמש:', currentUser);
+        
+        // מעבר למסך הגלגל עם אנימציה
+        transitionToWheelScreen();
+    } catch (error) {
+        console.error('שגיאה בבדיקת מספר הטלפון:', error);
+        showError('אירעה שגיאה בבדיקת פרטי המשתמש. אנא נסו שוב מאוחר יותר.');
+    }
+}
+
+/**
+ * מציג הודעה מותאמת כאשר משתמש כבר השתתף בהגרלה
+ * @param {string} userName - שם המשתמש
+ */
+function displayAlreadyParticipatedMessage(userName) {
+    const userSection = document.getElementById('user-section');
+    if (!userSection) {
+        console.error('לא נמצא מסך טופס המשתמש');
+        return;
+    }
+    
+    // יצירת אלמנט להודעה מותאמת
+    const alreadyPlayedMessage = document.createElement('div');
+    alreadyPlayedMessage.className = 'already-played-message';
+    alreadyPlayedMessage.innerHTML = `
+        <div class="card">
+            <h2>היי ${userName || 'שם ידידי'}, נעים לראותך שוב!</h2>
+            <p class="message-text">אני רואה שכבר סובבת אותי! לא ניתן לסובב אותי פעמיים 😉</p>
+            <div class="restart-container">
+                <button id="already-played-restart" class="btn restart-button">התחל מחדש</button>
+            </div>
+        </div>
+    `;
+    
+    // מחיקת תוכן קודם במסך הטופס
+    userSection.innerHTML = '';
+    userSection.appendChild(alreadyPlayedMessage);
+    
+    // הוספת מאזין אירועים לכפתור התחל מחדש
+    const restartButton = document.getElementById('already-played-restart');
+    if (restartButton) {
+        restartButton.addEventListener('click', function() {
+            // טעינת הדף מחדש כדי לאפס את היישום
+            window.location.reload();
+        });
+    }
 }
 
 /**
@@ -244,7 +301,7 @@ async function handleSpinEnd(prizeIndex) {
     
     if (resultTitle && resultDescription && resultImage) {
         // הגדרת כותרת הפרס
-        resultTitle.textContent = ` ברכות! זכית ב - ${prize.name}`;
+        resultTitle.textContent = ` ברכות! זכית בהטבה של - ${prize.name}`;
         
         // הגדרת תיאור הפרס
         resultDescription.textContent = prize.description || `פרטי הזכייה והמימוש נשלחו בדוא"ל.`;

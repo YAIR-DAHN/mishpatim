@@ -15,6 +15,7 @@ export let isSpinning = false;
 let spinTimeout = null;
 let currentRotation = 0;
 let audioContext = null;
+let originalPrizes = []; // שמירת רשימת הפרסים המקורית
 
 /**
  * אתחול גלגל המזל
@@ -22,7 +23,15 @@ let audioContext = null;
  * @param {Function} callback - פונקציית קולבק לסיום הסיבוב
  */
 export function initWheel(prizesArray, callback) {
-    prizes = prizesArray;
+    // שמירת רשימת הפרסים המקורית
+    originalPrizes = prizesArray;
+    
+    // סינון רק פרסים זמינים (יש במלאי וההסתברות חיובית)
+    prizes = prizesArray.filter(prize => 
+        (prize.stock || 0) > (prize.distributed || 0) && 
+        (prize.probability || 0) > 0
+    );
+    
     spinEndCallback = callback;
     
     // אתחול בד הציור
@@ -42,7 +51,7 @@ export function initWheel(prizesArray, callback) {
     // ציור הגלגל
     drawWheel();
     
-    console.log('גלגל המזל אותחל עם', prizes.length, 'פרסים');
+    console.log('גלגל המזל אותחל עם', prizes.length, 'פרסים זמינים מתוך', originalPrizes.length, 'פרסים');
     
     // אתחול מערכת השמע
     try {
@@ -75,35 +84,26 @@ function drawWheel() {
         const angle = i * arc + currentRotation;
         const nextAngle = (i + 1) * arc + currentRotation;
         
-        // בדיקה האם הפרס זמין
-        const isAvailable = (prize.stock || 0) > (prize.distributed || 0) && prize.probability > 0;
-        
         // ציור מקטע
         wheelCtx.beginPath();
         wheelCtx.moveTo(centerX, centerY);
         wheelCtx.arc(centerX, centerY, radius, angle, nextAngle);
         wheelCtx.closePath();
         
-        // בחירת צבעים בהתאם לזמינות
+        // בחירת צבעים לפי האינדקס
         let primaryColor, secondaryColor;
         
-        if (!isAvailable) {
-            // צבעים לפרס לא זמין
-            primaryColor = '#9E9E9E';    // אפור בהיר
-            secondaryColor = '#757575';  // אפור כהה
+        // צבעים לפרס - מתחלפים לפי האינדקס
+        const colorIndex = i % 3;
+        if (colorIndex === 0) {
+            primaryColor = '#1e3a8a';   // כחול כהה (לשכה)
+            secondaryColor = '#1e40af';  // כחול כהה יותר
+        } else if (colorIndex === 1) {
+            primaryColor = '#0891b2';   // ציאן
+            secondaryColor = '#0e7490';  // ציאן כהה
         } else {
-            // צבעים לפרס זמין - מתחלפים לפי האינדקס
-            const colorIndex = i % 3;
-            if (colorIndex === 0) {
-                primaryColor = '#1e3a8a';   // כחול כהה (לשכה)
-                secondaryColor = '#1e40af';  // כחול כהה יותר
-            } else if (colorIndex === 1) {
-                primaryColor = '#0891b2';   // ציאן
-                secondaryColor = '#0e7490';  // ציאן כהה
-            } else {
-                primaryColor = '#1d4ed8';   // כחול רויאל
-                secondaryColor = '#1e3a8a';  // כחול נייבי
-            }
+            primaryColor = '#1d4ed8';   // כחול רויאל
+            secondaryColor = '#1e3a8a';  // כחול נייבי
         }
         
         // יצירת גרדיאנט
@@ -129,7 +129,7 @@ function drawWheel() {
         wheelCtx.rotate(angle + arc / 2);
         
         wheelCtx.textAlign = 'right';
-        wheelCtx.fillStyle = isAvailable ? '#ffffff' : '#E0E0E0';  // טקסט בהיר יותר לפרסים לא זמינים
+        wheelCtx.fillStyle = '#ffffff';
         wheelCtx.font = 'bold 14px Heebo, Arial';
         wheelCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
         wheelCtx.shadowBlur = 2;
@@ -265,13 +265,8 @@ export function spinWheel() {
             return;
         }
 
-        // בדיקה האם יש פרסים זמינים לפני התחלת הסיבוב
-        const availablePrizes = prizes.filter(prize => 
-            (prize.stock || 0) > (prize.distributed || 0) && 
-            (prize.probability || 0) > 0
-        );
-
-        if (availablePrizes.length === 0) {
+        // בדיקה האם יש פרסים זמינים
+        if (prizes.length === 0) {
             showError('מצטערים, כל הפרסים חולקו! תודה על השתתפותכם');
             reject(new Error('אין פרסים זמינים'));
             return;

@@ -7,7 +7,7 @@
  */
 
 const APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbzWgiUArEfmDUR6Rh-f_pc4ul7w4f3qbE4HdZdgq0LLmHtPuCLcAqLYrz09FB86Pag1/exec';
+  'https://script.google.com/macros/s/AKfycbxbdGbH6hg3vbP35Xdb7XLCqp8fwkPl6dvCSaPbp2crm8o0piIbRwJrNu56GKbPUhQB/exec';
 const CACHE_DURATION = 10_000;          // 10 שניות
 const FORCE_API_IN_DEV = true;          // אל תשתמש בדמה גם ב‑localhost
 
@@ -195,6 +195,48 @@ export function getRandomPrize() {
 /* ---------- Utility: בדיקה האם פרס זמין ---------- */
 export function isPrizeAvailable(prize) {
   return (prize.stock || 0) > (prize.distributed || 0) && prize.probability > 0;
+}
+
+/* ---------- GET / checkPhoneExists ---------- */
+export async function checkPhoneExists(phone) {
+  if (shouldUseMockData()) {
+    console.log('משתמש בנתוני דמה (מוק) עבור בדיקת טלפון');
+    // במצב דמה, נחזיר שהמספר לא קיים
+    return { exists: false };
+  }
+
+  try {
+    // ניקוי והסרת כל התווים שאינם ספרות מהטלפון
+    const cleanPhone = (phone || '').replace(/\D/g, '');
+    if (!cleanPhone) {
+      throw new Error('מספר טלפון לא תקין');
+    }
+
+    console.log('מספר טלפון להשוואה (לפני נרמול):', cleanPhone);
+    
+    // השרת כבר יטפל בנרמול מספר הטלפון ובהסרת האפס המקדים אם קיים
+    // אנחנו רק צריכים לשלוח מספר טלפון תקין
+    
+    console.log('בודק אם מספר טלפון קיים:', cleanPhone);
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=checkIfPhoneExists&phone=${encodeURIComponent(cleanPhone)}`, {
+      method: 'GET',
+      redirect: 'follow'
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    console.log('תשובה מהשרת לגבי בדיקת טלפון:', data);
+    return data;
+  } catch (error) {
+    console.error('שגיאה בבדיקת מספר טלפון:', error);
+    return { 
+      exists: false, 
+      error: error.toString() 
+    };
+  }
 }
 
 /**
