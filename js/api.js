@@ -172,6 +172,11 @@ export function getRandomPrize() {
     return null;
   }
 
+  // לוג מפורט של הפרסים הזמינים
+  console.log('פרסים זמינים להגרלה:', availablePrizes.map(p => 
+    `${p.id}: ${p.name} (מלאי: ${p.stock} חולקו: ${p.distributed})`
+  ).join('\n'));
+
   // חישוב סך כל ההסתברויות
   const totalProbability = availablePrizes.reduce((sum, prize) => 
     sum + (prize.probability || 0), 0
@@ -179,17 +184,31 @@ export function getRandomPrize() {
 
   // בחירת מספר אקראי בין 0 לסך ההסתברויות
   let random = Math.random() * totalProbability;
+  console.log(`סך כל ההסתברויות: ${totalProbability}, מספר אקראי: ${random}`);
 
   // בחירת הפרס לפי ההסתברות
+  let selectedPrize = null;
   for (const prize of availablePrizes) {
     random -= (prize.probability || 0);
     if (random <= 0) {
-      return prize;
+      selectedPrize = prize;
+      break;
     }
   }
 
-  // במקרה קצה, נחזיר את הפרס האחרון
-  return availablePrizes[availablePrizes.length - 1];
+  // במקרה קצה, נבחר את הפרס האחרון
+  if (!selectedPrize && availablePrizes.length > 0) {
+    selectedPrize = availablePrizes[availablePrizes.length - 1];
+  }
+  
+  // בדיקה סופית שהפרס זמין
+  if (selectedPrize && isPrizeAvailable(selectedPrize)) {
+    console.log(`נבחר פרס: ${selectedPrize.name} (ID: ${selectedPrize.id}, מלאי: ${selectedPrize.stock}, חולקו: ${selectedPrize.distributed})`);
+    return selectedPrize;
+  } else {
+    console.error('שגיאה: הפרס שנבחר אינו זמין!', selectedPrize);
+    return null;
+  }
 }
 
 /* ---------- Utility: בדיקה האם פרס זמין ---------- */

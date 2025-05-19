@@ -2,7 +2,7 @@
  * מודול לניהול גלגל המזל
  */
 
-import { getRandomPrize } from './api.js';
+import { getRandomPrize, clearPrizesCache, getPrizes } from './api.js';
 
 // משתנים גלובליים
 let wheelCanvas = null;
@@ -31,6 +31,17 @@ export function initWheel(prizesArray, callback) {
         (prize.stock || 0) > (prize.distributed || 0) && 
         (prize.probability || 0) > 0
     );
+    
+    // אם אין פרסים זמינים, נציג הודעה ונחזיר
+    if (prizes.length === 0) {
+        console.error('אין פרסים זמינים להצגה בגלגל!');
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer) {
+            errorContainer.textContent = 'מצטערים, כל הפרסים חולקו! תודה על השתתפותכם';
+            errorContainer.classList.remove('hidden');
+        }
+        return;
+    }
     
     spinEndCallback = callback;
     
@@ -296,7 +307,7 @@ function startSpinSound() {
  * סיבוב הגלגל
  */
 export function spinWheel() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         if (isSpinning) {
             showError('הגלגל כבר מסתובב, אנא המתן');
             reject(new Error('הגלגל כבר מסתובב'));
@@ -319,48 +330,93 @@ export function spinWheel() {
             setTimeout(startSpinSound, 300);
         }
 
-        // קבלת פרס אקראי מה-API
-        const selectedPrize = getRandomPrize();
-        if (!selectedPrize) {
-            isSpinning = false;
-            showError('מצטערים, אירעה שגיאה בבחירת הפרס. אנא נסו שוב');
-            reject(new Error('לא נמצא פרס זמין'));
-            return;
-        }
-
-        // מציאת האינדקס של הפרס בגלגל
-        const prizeIndex = prizes.findIndex(p => p.id === selectedPrize.id);
-        if (prizeIndex === -1) {
-            isSpinning = false;
-            reject(new Error('הפרס שנבחר לא נמצא בגלגל'));
-            return;
-        }
-
-        // חישוב הזווית הסופית
-        const segmentAngle = 360 / prizes.length;
-        const finalAngle = 360 * 5 + (360 - (prizeIndex * segmentAngle) - (segmentAngle / 2)); // 5 סיבובים מלאים + הזווית לפרס
-        
-        // אנימציית הסיבוב
-        const startTime = performance.now();
-        const spinDuration = 5; // 5 שניות
-        const animate = (currentTime) => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / (spinDuration * 1000), 1);
+        try {
+            // קבלת פרס אקראי מה-API
+            let selectedPrize = getRandomPrize();
             
-            // פונקציית האטה
-            const easeOut = (t) => 1 - Math.pow(1 - t, 3);
-            currentRotation = easeOut(progress) * finalAngle;
-            
-            drawWheel();
-            
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                finishSpin(prizeIndex, resolve);
+            // אם אין פרס זמין, ננסה לרענן את המטמון ולנסות שוב
+            if (!selectedPrize) {
+                console.log('אין פרסים זמינים במטמון, מרענן מטמון...');
+                // ניקוי המטמון
+                clearPrizesCache();
+                // טעינה מחדש של הפרסים
+                const freshPrizes = await getPrizes();
+                console.log('נטענו פרסים חדשים:', freshPrizes);
+                // ניסיון נוסף לקבלת פרס אקראי
+                selectedPrize = getRandomPrize();
             }
-        };
-        
-        requestAnimationFrame(animate);
+            
+            if (!selectedPrize) {
+                isSpinning = false;
+                showError('מצטערים, אירעה שגיאה בבחירת הפרס. אנא נסו שוב');
+                reject(new Error('לא נמצא פרס זמין גם אחרי ריענון המטמון'));
+                return;
+            }
+
+            // בדיקה נוספת שהפרס לא אזל מהמלאי
+            if ((selectedPrize.stock || 0) <= (selectedPrize.distributed || 0)) {
+                isSpinning = false;
+                showError('מצטערים, הפרס שנבחר אזל מהמלאי. אנא נסו שוב');
+                reject(new Error('הפרס שנבחר אזל מהמלאי'));
+                return;
+            }
+
+            // מציאת האינדקס של הפרס בגלגל
+            console.log('מחפש את הפרס בגלגל. ID הפרס הנבחר:', selectedPrize.id);
+            const prizeIndex = prizes.findIndex(p => p.id === selectedPrize.id);
+            console.log('אינדקס הפרס בגלגל:', prizeIndex);
+            
+            if (prizeIndex === -1) {
+                isSpinning = false;
+                showError('מצטערים, אירעה שגיאה בהתאמת הפרס לגלגל. אנא נסו שוב');
+                reject(new Error('הפרס שנבחר לא נמצא בגלגל'));
+                return;
+            }
+
+            // בדיקה נוספת שהפרס במיקום בגלגל זהה לפרס שנבחר
+            if (prizes[prizeIndex].id !== selectedPrize.id) {
+                isSpinning = false;
+                console.error(
+                    'שגיאה חמורה: אי-התאמה בין הפרס שנבחר לבין הפרס בגלגל!',
+                    'פרס נבחר:', selectedPrize,
+                    'פרס בגלגל:', prizes[prizeIndex]
+                );
+                showError('מצטערים, אירעה שגיאה בהתאמת הפרס. אנא נסו שוב');
+                reject(new Error('אי-התאמה בין הפרס שנבחר לבין הפרס בגלגל'));
+                return;
+            }
+
+            // חישוב הזווית הסופית
+            const segmentAngle = 360 / prizes.length;
+            const finalAngle = 360 * 5 + (360 - (prizeIndex * segmentAngle) - (segmentAngle / 2)); // 5 סיבובים מלאים + הזווית לפרס
+            
+            // אנימציית הסיבוב
+            const startTime = performance.now();
+            const spinDuration = 5; // 5 שניות
+            const animate = (currentTime) => {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / (spinDuration * 1000), 1);
+                
+                // פונקציית האטה
+                const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+                currentRotation = easeOut(progress) * finalAngle;
+                
+                drawWheel();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    finishSpin(prizeIndex, resolve);
+                }
+            };
+            
+            requestAnimationFrame(animate);
+        } catch (error) {
+            console.error('שגיאה בסיבוב הגלגל:', error);
+            isSpinning = false;
+            showError('אירעה שגיאה בסיבוב הגלגל. אנא נסו שוב');
+            reject(error);
+        }
     });
 }
 
@@ -381,16 +437,32 @@ function finishSpin(prizeIndex, resolve) {
         }
     }
     
-    console.log('הגלגל עצר על פרס מספר:', prizeIndex, prizes[prizeIndex].name);
+    // בדיקה שוב שהפרס לא אזל מהמלאי בזמן הסיבוב
+    const selectedPrize = prizes[prizeIndex];
+    console.log('הגלגל עצר על פרס מספר:', prizeIndex, selectedPrize.name, `(ID: ${selectedPrize.id})`);
+
+    // בדיקה סופית שהפרס זמין
+    if ((selectedPrize.stock || 0) <= (selectedPrize.distributed || 0)) {
+        console.error('שגיאה חמורה: הפרס שנבחר אזל מהמלאי!', selectedPrize);
+        showError('מצטערים, הפרס שנבחר אזל מהמלאי. אנא נסו שוב');
+        resetWheel();
+        // מחזירים null כדי לסמן שהייתה שגיאה
+        resolve(null);
+        return;
+    }
+    
+    // עדכון המטמון לאחר זכייה
+    clearPrizesCache();
+    console.log('מטמון הפרסים נוקה');
     
     // קריאה לפונקציית הקולבק
     if (spinEndCallback && typeof spinEndCallback === 'function') {
         setTimeout(() => {
-            spinEndCallback(prizeIndex);
+            spinEndCallback(selectedPrize);
         }, 500);
     }
     
-    resolve(prizes[prizeIndex]);
+    resolve(selectedPrize);
 }
 
 /**

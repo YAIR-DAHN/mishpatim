@@ -202,6 +202,18 @@ function transitionToWheelScreen() {
         return;
     }
     
+    // בדיקה שיש פרסים זמינים לפני מעבר למסך הגלגל
+    const availablePrizes = prizes.filter(prize => 
+        (prize.stock || 0) > (prize.distributed || 0) && 
+        (prize.probability || 0) > 0
+    );
+    
+    if (availablePrizes.length === 0) {
+        console.error('אין פרסים זמינים להגרלה!');
+        showError('מצטערים, כל הפרסים חולקו! תודה על השתתפותכם');
+        return;
+    }
+    
     // הוספת אנימציית יציאה למסך הטופס
     userSection.style.opacity = '1';
     userSection.style.transform = 'translateY(0)';
@@ -290,17 +302,26 @@ function handleSpinClick() {
 
 /**
  * מטפל בסיום סיבוב הגלגל
- * @param {number} prizeIndex - אינדקס הפרס הזוכה
+ * @param {Object} selectedPrize - אובייקט הפרס הזוכה (לא אינדקס!)
  */
-async function handleSpinEnd(prizeIndex) {
-    console.log('סיום סיבוב הגלגל, אינדקס פרס:', prizeIndex);
+async function handleSpinEnd(selectedPrize) {
+    console.log('סיום סיבוב הגלגל, פרס נבחר:', selectedPrize);
     
-    if (prizeIndex === undefined || prizeIndex === null || !prizes[prizeIndex]) {
-        console.error('אינדקס פרס לא תקין או פרס לא נמצא:', prizeIndex);
+    // בדיקה שהפרס קיים ותקין
+    if (!selectedPrize || !selectedPrize.id) {
+        console.error('פרס לא תקין או לא נמצא:', selectedPrize);
+        showError('אירעה שגיאה בבחירת הפרס. אנא נסו שוב');
         return;
     }
     
-    const prize = prizes[prizeIndex];
+    // בדיקה נוספת שהפרס לא אזל מהמלאי
+    if ((selectedPrize.stock || 0) <= (selectedPrize.distributed || 0)) {
+        console.error('אירעה שגיאה חמורה: הפרס שנבחר אזל מהמלאי!', selectedPrize);
+        showError('מצטערים, הפרס שנבחר אזל מהמלאי. אנא נסו שוב');
+        return;
+    }
+    
+    const prize = selectedPrize;
     console.log('זכית בפרס:', prize.name);
     
     // עדכון מסך התוצאה
@@ -316,7 +337,7 @@ async function handleSpinEnd(prizeIndex) {
         resultDescription.textContent = prize.description || `פרטי הזכייה והמימוש נשלחו בדוא"ל.`;
         
         // הגדרת תמונת הפרס
-        const prizeId = prize.id || prizeIndex;
+        const prizeId = prize.id;
         resultImage.src = getPrizeImagePath(prizeId);
         resultImage.alt = prize.name;
         
@@ -343,7 +364,7 @@ async function handleSpinEnd(prizeIndex) {
                 userName: currentUser?.name || '',
                 userEmail: currentUser?.email || '',
                 userPhone: currentUser?.phone || '',
-                prizeId: prize.id || prizeIndex,
+                prizeId: prize.id,
                 prizeName: prize.name,
                 redemptionMethod: prize.redemptionMethod || '',
                 validityTerms: prize.validityTerms || '',
