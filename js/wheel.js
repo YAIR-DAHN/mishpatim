@@ -7,8 +7,8 @@ import { getRandomPrize } from './api.js';
 // משתנים גלובליים
 let wheelCanvas = null;
 let wheelCtx = null;
-let canvasWidth = 400;
-let canvasHeight = 400;
+let canvasWidth = 600;
+let canvasHeight = 600;
 let prizes = [];
 let spinEndCallback = null;
 export let isSpinning = false;
@@ -62,6 +62,32 @@ export function initWheel(prizesArray, callback) {
 }
 
 /**
+ * עוטף טקסט לשורות לפי רוחב מקסימלי
+ * @param {CanvasRenderingContext2D} ctx - קונטקסט הקנבס
+ * @param {string} text - הטקסט לעיטוף
+ * @param {number} maxWidth - רוחב מקסימלי לשורה
+ * @returns {string[]} - מערך שורות
+ */
+function wrapText(ctx, text, maxWidth) {
+    const words = text.split(' ');
+    const lines = [];
+    let line = '';
+    for (let n = 0; n < words.length; n++) {
+        const testLine = line + (line ? ' ' : '') + words[n];
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && line) {
+            lines.push(line);
+            line = words[n];
+        } else {
+            line = testLine;
+        }
+    }
+    if (line) lines.push(line);
+    return lines;
+}
+
+/**
  * ציור הגלגל
  */
 function drawWheel() {
@@ -76,7 +102,7 @@ function drawWheel() {
     // הגדרת המרכז
     const centerX = canvasWidth / 2;
     const centerY = canvasHeight / 2;
-    const radius = Math.min(centerX, centerY) - 10;
+    const radius = Math.min(centerX, centerY) - 2;
     
     // ציור המקטעים
     for (let i = 0; i < prizes.length; i++) {
@@ -134,14 +160,26 @@ function drawWheel() {
         wheelCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
         wheelCtx.shadowBlur = 2;
         
-        // קיצור שם הפרס אם ארוך מדי
+        // עטיפת שם הפרס לשורות
         let prizeName = prizes[i].name;
-        if (prizeName.length > 20) {
-            prizeName = prizeName.substring(0, 17) + '...';
+        // מרחק מהקצה החיצוני
+        const textRadius = radius - 20;
+        const maxTextWidth = radius * 0.6;
+        let lines = wrapText(wheelCtx, prizeName, maxTextWidth);
+        const maxLines = 3;
+        if (lines.length > maxLines) {
+            lines = lines.slice(0, maxLines);
+            lines[maxLines-1] = lines[maxLines-1].replace(/.{3}$/, '') + '...';
         }
-        
-        // ציור הטקסט
-        wheelCtx.fillText(prizeName, radius - 25, 5);
+        const lineHeight = 15;
+        // ציור כל שורה במרחק קבוע מהמרכז, קרוב לקצה
+        for (let j = 0; j < lines.length; j++) {
+            wheelCtx.fillText(
+                lines[j],
+                textRadius,
+                (j - (lines.length - 1) / 2) * lineHeight
+            );
+        }
         wheelCtx.restore();
     }
     

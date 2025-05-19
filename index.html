@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>גלגל המזל - הוצאה לאור של לשכת עורכי הדין</title>
+    <title>גלגל המזל - ההוצאה לאור של לשכת עורכי הדין</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap">
     <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
@@ -17,7 +17,7 @@
                 <img src="assets/images/logo/logo.png" alt="לוגו ההוצאה לאור של לשכת עורכי הדין" class="logo">
             </div>
             <h1 class="main-title">הצדק מסתובב לטובתך!<br>
-                גלגל המזל - הוצאה לאור של לשכת עורכי הדין</h1>
+                גלגל המזל - ההוצאה לאור של לשכת עורכי הדין</h1>
         </header>
 
         <!-- טופס משתתף -->
@@ -39,6 +39,7 @@
                     <div class="form-group">
                         <label for="phone">טלפון</label>
                         <input type="tel" id="phone" name="phone" required>
+                        <div id="phone-error" class="error-message hidden">משהו לא מסתדר לנו עם מספר הטלפון, כדאי לנסות שוב</div>
                     </div>
                     
                     <div class="form-group">
@@ -58,7 +59,7 @@
         <!-- מסך גלגל המזל -->
         <section id="wheel-section" class="section wheel-section hidden">
             <div class="card wheel-card">
-                <h2>סובבו את הגלגל וגלו מה הפרס שלכם!</h2>
+                <h2>סובבו את הגלגל וגלו באיזו הטבה זכיתם!</h2>
                 
                 <div class="wheel-layout">
                     <div class="wheel-container">
@@ -93,7 +94,7 @@
                     <p id="result-description" class="prize-description">תיאור הפרס יופיע כאן</p>
                     
                     <div class="result-actions">
-                        <button id="restart-button" class="btn restart-button">הבא בתור בבקשה!</button>
+                        <button id="restart-button" class="btn restart-button">התחל מחדש!</button>
                     </div>
                 </div>
             </div>
@@ -116,20 +117,32 @@
             <span class="close">&times;</span>
             <h2>תנאי שימוש</h2>
             <div class="terms-content">
-                <p><strong>ברוכים הבאים לגלגל המזל של ההוצאה לאור של לשכת עורכי הדין!</strong></p>
-                <p>אנא קראו בעיון את תנאי השימוש הבאים לפני השימוש באתר זה. השימוש באתר מהווה הסכמה לתנאים אלו.</p>
-                <p><strong>1. כללי</strong><br>
-                ההשתתפות בהטבה פתוחה לכל המשתתפים בכנס המשפטים 2024. המשתתף מתחייב למסור פרטים נכונים ומדויקים בעת הרישום להטבה.</p>
-                <p><strong>2. פרטיות</strong><br>
-                הפרטים האישיים שנמסרו ישמשו את ההוצאה לאור של לשכת עורכי הדין לצורך ההטבה, יצירת קשר עם הזוכים, ושליחת עדכונים בנושאים מקצועיים. לא יעשה שימוש בפרטים למטרות מסחריות אחרות ללא הסכמת המשתתף.</p>
-                <p><strong>3. הפרסים</strong><br>
-                הפרסים המוצגים בגלגל המזל ניתנים כמות שהם (AS IS). ההוצאה לאור שומרת לעצמה את הזכות להחליף את הפרס המוצע בפרס שווה ערך במקרה של אי זמינות או מסיבה אחרת.</p>
-                <p><strong>4. תוקף ההטבה</strong><br>
-                ההטבה תקפה לתקופת הכנס בלבד. הוצאה לאור של לשכת עורכי הדין רשאית להפסיק את ההטבה בכל עת ללא הודעה מוקדמת.</p>
-                <p><strong>5. מימוש הפרס</strong><br>
-                הזוכים יקבלו את הפרס במהלך הכנס או בדרך שתתואם עמם בהמשך. יש לממש את הפרס תוך 30 יום מיום הזכייה.</p>
-                <p>השימוש באתר זה ובגלגל ההטבה הוא באחריות המשתמש בלבד. ההוצאה לאור של לשכת עורכי הדין לא תהיה אחראית לכל נזק עקיף, תוצאתי או מקרי שנגרם כתוצאה מהשימוש באתר.</p>
-                <p>ט.ל.ח. בכפוף לתקנון ההטבה המלא.</p>
+                <h3 class="terms-main-title">תנאי רישום לרשימת הדיוור של ההוצאה לאור וקבלת ההטבה</h3>
+                <h4 class="terms-subtitle">למשתתפים בכנס השנתי של לשכת עורכי הדין 2025</h4>
+
+                <div class="terms-list">
+                    <p class="terms-item"><span class="terms-number">1.</span> עורכי דין שמשתתפים בכנס השנתי של לשכת עורכי הדין 2025 ("הכנס") ונרשמים לרשימת הדיוור של ההוצאה לאור זכאים לקבלת הטבה.</p>
+                    
+                    <p class="terms-item"><span class="terms-number">2.</span> רשימות הדיוור של ההוצאה לאור נשלחות בדואר אלקטרוני או במסרונים, והן כוללות מידע אודות מוצרים ושירותים של ההוצאה לאור ושל צדדים שלישיים שונים שההוצאה לאור פועלת עימם בשיתוף.</p>
+                    
+                    <p class="terms-item"><span class="terms-number">3.</span> חובה למסור פרטים נכונים ומלאים.</p>
+                    
+                    <p class="terms-item"><span class="terms-number">4.</span> לכל נרשם זכות להשתתף בהפעלה אחת של גלגל המזל ולקבל הטבה אחת בלבד.</p>
+                    
+                    <p class="terms-item"><span class="terms-number">5.</span> ההטבה הינה אישית ואינה ניתן להעברה.</p>
+                    
+                    <p class="terms-item"><span class="terms-number">6.</span> ההטבות המוצגות בגלגל המזל ניתנות כמות שהן (AS IS). ההוצאה לאור שומרת לעצמה את הזכות להחליף את ההטבה המוצעת בהטבה שוות ערך במקרה של אי זמינות או מסיבה אחרת.</p>
+                    
+                    <p class="terms-item"><span class="terms-number">7.</span> ההטבות למזון או משקה ניתנות למימוש בהתאם לתנאי ההטבה שתשלח.</p>
+                    
+                    <p class="terms-item"><span class="terms-number">8.</span> ההטבות לקורסים או ספרות משפטית ניתנות למימוש עד 30 יום ממועד קבלת ההודעה על ההטבה. הטבות לרכישת מוצרים / מנוי אסקי או קומסיין או טקדין AI בתוקף עד 30 יום ממועד קבלת ההודעה על ההטבה.</p>
+                    
+                    <p class="terms-item"><span class="terms-number">9.</span> אישור על קבלת ההטבה ישלח לכתובת הדואר האלקטרוני של הנרשם כפי שנמסרה על ידו בעת הרישום.</p>
+                    
+                    <p class="terms-item"><span class="terms-number">10.</span> ניתן לבקש להפסיק ולקבל הודעות כאמור בכל עת בהתאם להנחיות שתתפרסמנה בכל הודעה או בפניה להוצאה לאור בהתאם לפרטי הקשר המתפרסמים באתר האינטרנט של ההוצאה לאור בכתובת <a href="https://www.ibar.org.il/mdynyvt-prtyvt" target="_blank" rel="noopener">https://www.ibar.org.il/mdynyvt-prtyvt</a></p>
+                    
+                    <p class="terms-item"><span class="terms-number">11.</span> הטיפול במידע אישי יהיה כמפורט במדיניות הפרטיות של ההוצאה לאור המתפרסמת באתר ההוצאה לאור.</p>
+                </div>
             </div>
         </div>
     </div>

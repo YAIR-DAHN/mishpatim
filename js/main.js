@@ -106,9 +106,18 @@ async function handleUserSubmit(event) {
     }
     
     if (!isValidPhone(phoneInput.value)) {
-        showError('נא להזין מספר טלפון תקין');
+        const phoneError = document.getElementById('phone-error');
+        if (phoneError) {
+            phoneError.classList.remove('hidden');
+        }
         phoneInput.focus();
         return;
+    }
+    
+    // הסתרת הודעת שגיאה אם קיימת
+    const phoneError = document.getElementById('phone-error');
+    if (phoneError) {
+        phoneError.classList.add('hidden');
     }
     
     // נשמור זמנית את פרטי המשתמש
