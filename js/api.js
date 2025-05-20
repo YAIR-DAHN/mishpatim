@@ -7,7 +7,7 @@
  */
 
 const APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbw_VOw-JIFA7UwExGIZIpHPxJooWAfXScoi7fkegLRLMs0_LexRdzKqVlGIf7RAB4nG/exec';
+  'https://script.google.com/macros/s/AKfycbxgZmyPPkcZXMRH4dyDHpVfD31NlGifRv1hNA5ZCd54HCzYizGk6zF6Ou2p694qTc-c/exec';
 const CACHE_DURATION = 10_000;          // 10 שניות
 const FORCE_API_IN_DEV = true;          // אל תשתמש בדמה גם ב‑localhost
 

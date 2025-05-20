@@ -354,7 +354,7 @@ async function handleSpinEnd(selectedPrize) {
         const spinButton = document.getElementById('spin-button');
         if (spinButton) {
             spinButton.disabled = false;
-            spinButton.textContent = 'אני לא שופט אתה יכול לסובב אותי :)';
+            spinButton.textContent = 'אני לא שופט את/ה יכול/ה לסובב אותי :)';
         }
         
         // ניסיון לשמור את הזכייה ב-API
