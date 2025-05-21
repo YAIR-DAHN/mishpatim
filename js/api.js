@@ -7,7 +7,12 @@
  */
 
 const APPS_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbxgZmyPPkcZXMRH4dyDHpVfD31NlGifRv1hNA5ZCd54HCzYizGk6zF6Ou2p694qTc-c/exec';
+  'https://script.google.com/macros/s/AKfycbyru3zwVwdyIX1zLQyvqRj_2gKQYgC3trI9nJFDEyCeCMIU7tJpuVo9avroqLvKuSSK/exec';
+
+
+  // API נוסף לגיבוי
+// const APPS_SCRIPT_URL =
+//   'https://script.google.com/macros/s/AKfycbzAMgxiUY4omUbB2aeS9wA7zdzQBjIv8EiJIM3uYy3jpxJgjGmOxsLhGbYJhjWqTdVa/exec';
 const CACHE_DURATION = 10_000;          // 10 שניות
 const FORCE_API_IN_DEV = true;          // אל תשתמש בדמה גם ב‑localhost
 
